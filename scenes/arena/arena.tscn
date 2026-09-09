@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scenes/arena/arena.gd" id="1_arena"]
 [ext_resource type="PackedScene" path="res://scenes/units/ironbound_knight.tscn" id="2_knight"]
+
+[ext_resource type="PackedScene" path="res://scenes/units/arena_militia.tscn" id="3_militia"]
 
 [node name="Arena" type="Node2D"]
 script = ExtResource("1_arena")
@@ -13,3 +15,6 @@ position_smoothing_enabled = false
 
 [node name="IronboundKnight" parent="." instance=ExtResource("2_knight")]
 position = Vector2(-320, 0)
+
+[node name="ArenaMilitia" parent="." instance=ExtResource("3_militia")]
+position = Vector2(320, 0)

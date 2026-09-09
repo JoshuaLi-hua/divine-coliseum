@@ -1,6 +1,9 @@
 extends CharacterBody2D
 ## Minimal shared foundation. Stats are inert until later gameplay steps.
 
+enum Team { PLAYER, ENEMY }
+
+@export var team: Team = Team.PLAYER
 @export var unit_name: String = "Unit"
 @export var max_health: int = 1
 @export var move_speed: float = 0.0

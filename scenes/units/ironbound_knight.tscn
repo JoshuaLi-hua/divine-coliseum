@@ -3,6 +3,7 @@
 [ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1_unit"]
 
 [node name="IronboundKnight" instance=ExtResource("1_unit")]
+team = 0
 unit_name = "Ironbound Knight"
 max_health = 180
 move_speed = 120.0
