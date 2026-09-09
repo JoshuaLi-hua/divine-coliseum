@@ -51,5 +51,5 @@ func _on_card_dropped(card: SummonCard, viewport_position: Vector2) -> void:
 
 
 func _update_battle() -> void:
-	$Screen/BattleStatus.text = "Battle %d / %d\nEnemies: %d" % [_battle.current_battle, _battle.BATTLE_COUNTS.size(), _battle.active_enemies.size()]
+	$Screen/BattleStatus.text = "Battle %d / %d\nEnemies: %d" % [_battle.current_battle, _battle.BATTLES.size(), _battle.active_enemies.size()]
 	$Screen/BattleMessage.text = "VICTORY" if _battle.victory else ("BATTLE CLEARED" if _battle.between_battles else "")
