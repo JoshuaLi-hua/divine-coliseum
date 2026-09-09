@@ -16,15 +16,21 @@ var current_health: int = 0
 var current_target: Unit = null
 var is_dead: bool = false
 var _attack_time_left: float = 0.0
+var _hit_tween: Tween
+var _visual_rest_modulate: Color
 var _attack_tween: Tween
 var _visual_rest_position: Vector2
 
+@onready var _health_bar: Node2D = $HealthBar
+@onready var _health_fill: ColorRect = $HealthBar/Fill
 @onready var _visual: Node2D = $Visual
 
 
 func _ready() -> void:
+	_visual_rest_modulate = _visual.modulate
 	_visual_rest_position = _visual.position
 	current_health = max_health
+	_update_health_bar()
 	add_to_group("units")
 
 
@@ -82,8 +88,11 @@ func take_damage(amount: int) -> void:
 	if is_dead or amount <= 0:
 		return
 	current_health = maxi(0, current_health - amount)
+	_update_health_bar()
 	if current_health == 0:
 		_die()
+	else:
+		_play_hit_cue()
 
 
 func _die() -> void:
@@ -96,7 +105,16 @@ func _die() -> void:
 	remove_from_group("units")
 	if _attack_tween != null:
 		_attack_tween.kill()
-	queue_free()
+	if _hit_tween != null:
+		_hit_tween.kill()
+	_health_bar.hide()
+	_visual.position = _visual_rest_position
+	_visual.modulate = _visual_rest_modulate
+	# The fading corpse must not block other living units.
+	$CollisionShape2D.set_deferred("disabled", true)
+	var death_tween: Tween = create_tween()
+	death_tween.tween_property(_visual, "modulate:a", 0.0, 0.2)
+	death_tween.tween_callback(queue_free)
 
 
 func _play_attack_cue(direction: Vector2) -> void:
@@ -105,3 +123,15 @@ func _play_attack_cue(direction: Vector2) -> void:
 	_visual.position = _visual_rest_position + direction * 3.0
 	_attack_tween = create_tween()
 	_attack_tween.tween_property(_visual, "position", _visual_rest_position, 0.12)
+
+
+func _update_health_bar() -> void:
+	_health_fill.scale.x = clampf(float(current_health) / float(maxi(1, max_health)), 0.0, 1.0)
+
+
+func _play_hit_cue() -> void:
+	if _hit_tween != null:
+		_hit_tween.kill()
+	_visual.modulate = _visual_rest_modulate * Color(0.55, 0.55, 0.55, 1.0)
+	_hit_tween = create_tween()
+	_hit_tween.tween_property(_visual, "modulate", _visual_rest_modulate, 0.1)

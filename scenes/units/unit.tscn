@@ -15,3 +15,28 @@ script = ExtResource("1_unit")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -14)
 shape = SubResource("Capsule_unit")
+
+[node name="HealthBar" type="Node2D" parent="."]
+position = Vector2(-20, -74)
+
+[node name="Border" type="ColorRect" parent="HealthBar"]
+offset_right = 40.0
+offset_bottom = 8.0
+mouse_filter = 2
+color = Color(0.04, 0.04, 0.04, 1)
+
+[node name="Background" type="ColorRect" parent="HealthBar"]
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 38.0
+offset_bottom = 6.0
+mouse_filter = 2
+color = Color(0.3, 0.3, 0.3, 1)
+
+[node name="Fill" type="ColorRect" parent="HealthBar"]
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 38.0
+offset_bottom = 6.0
+mouse_filter = 2
+color = Color(0.94, 0.94, 0.94, 1)
