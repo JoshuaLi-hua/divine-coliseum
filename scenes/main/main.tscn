@@ -1,10 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/arena/arena.tscn" id="1_arena"]
 
 [ext_resource type="Script" path="res://scenes/ui/combat_ui.gd" id="2_ui"]
-[ext_resource type="PackedScene" path="res://scenes/cards/card.tscn" id="3_card"]
-[ext_resource type="PackedScene" path="res://scenes/units/ironbound_knight.tscn" id="4_knight"]
 
 [node name="Main" type="Node2D"]
 
@@ -32,15 +30,20 @@ mouse_filter = 2
 theme_override_font_sizes/font_size = 26
 horizontal_alignment = 2
 
-[node name="Card" parent="CombatUI/Screen" instance=ExtResource("3_card")]
+[node name="Hand" type="Control" parent="CombatUI/Screen"]
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -120.0
 offset_top = -130.0
-offset_right = 120.0
-offset_bottom = -18.0
-display_name = "Ironbound Knight"
-divine_power_cost = 3
-unit_scene = ExtResource("4_knight")
+mouse_filter = 2
+
+[node name="Piles" type="Label" parent="CombatUI/Screen"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -90.0
+offset_right = 240.0
+offset_bottom = -24.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 22
