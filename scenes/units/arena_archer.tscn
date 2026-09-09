@@ -1,9 +1,14 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1_unit"]
 
+[ext_resource type="PackedScene" path="res://scenes/projectiles/projectile.tscn" id="2_arrow"]
+
 [node name="ArenaArcher" instance=ExtResource("1_unit")]
 team = 1
+attack_mode = 1
+projectile_scene = ExtResource("2_arrow")
+projectile_speed = 650.0
 unit_name = "Arena Archer"
 max_health = 55
 move_speed = 85.0

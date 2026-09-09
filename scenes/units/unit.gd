@@ -5,6 +5,11 @@ extends CharacterBody2D
 signal died(unit: Unit)
 
 enum Team { PLAYER, ENEMY }
+enum AttackMode { MELEE, PROJECTILE }
+
+@export var attack_mode: AttackMode = AttackMode.MELEE
+@export var projectile_scene: PackedScene
+@export var projectile_speed: float = 650.0
 
 @export var team: Team = Team.PLAYER
 @export var unit_name: String = "Unit"
@@ -81,7 +86,10 @@ func _try_attack() -> void:
 		return
 	_attack_time_left = attack_cooldown
 	_play_attack_cue(global_position.direction_to(current_target.global_position))
-	current_target.take_damage(attack_damage)
+	if attack_mode == AttackMode.PROJECTILE:
+		_fire_projectile()
+	else:
+		current_target.take_damage(attack_damage)
 	if not _is_valid_opponent(current_target):
 		current_target = null
 
@@ -138,3 +146,18 @@ func _play_hit_cue() -> void:
 	_visual.modulate = _visual_rest_modulate * Color(0.55, 0.55, 0.55, 1.0)
 	_hit_tween = create_tween()
 	_hit_tween.tween_property(_visual, "modulate", _visual_rest_modulate, 0.1)
+
+
+func _fire_projectile() -> void:
+	if projectile_scene == null:
+		return
+	var projectile: Projectile = projectile_scene.instantiate()
+	projectile.damage = attack_damage
+	projectile.speed = projectile_speed
+	projectile.source_team = team
+	projectile.target = current_target
+	var direction: Vector2 = global_position.direction_to(current_target.global_position)
+	var origin: Vector2 = global_position + Vector2(0, -30) + direction * 18.0
+	projectile.position = (get_parent() as Node2D).to_local(origin)
+	projectile.rotation = direction.angle()
+	get_parent().add_child(projectile)
