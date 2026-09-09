@@ -5,6 +5,7 @@ const KNIGHT: CardData = preload("res://scenes/cards/ironbound_knight.tres")
 const MILITIA: CardData = preload("res://scenes/cards/arena_militia.tres")
 var deck: CombatDeck = CombatDeck.new()
 
+@onready var _battle: BattleManager = get_parent().get_node("BattleManager")
 @onready var _hand: Control = $Screen/Hand
 @onready var _power_label: Label = $Screen/DivinePower
 @onready var _region: Node2D = get_parent().get_node("Arena/SummonRegion")
@@ -14,6 +15,7 @@ func _ready() -> void:
 	GameManager.reset_divine_power()
 	deck.initialize([KNIGHT, MILITIA, MILITIA, MILITIA])
 	_rebuild_hand()
+	_battle.changed.connect(_update_battle)
 
 func _update_power(value: float) -> void:
 	_power_label.text = "Divine Power: %d / 10" % floori(value)
@@ -46,3 +48,8 @@ func _on_card_dropped(card: SummonCard, viewport_position: Vector2) -> void:
 	for child: SummonCard in _hand.get_children():
 		child.consume()
 	_rebuild_hand.call_deferred()
+
+
+func _update_battle() -> void:
+	$Screen/BattleStatus.text = "Battle %d / %d\nEnemies: %d" % [_battle.current_battle, _battle.BATTLE_COUNTS.size(), _battle.active_enemies.size()]
+	$Screen/BattleMessage.text = "VICTORY" if _battle.victory else ("BATTLE CLEARED" if _battle.between_battles else "")

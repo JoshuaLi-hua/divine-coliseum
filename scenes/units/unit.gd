@@ -2,6 +2,8 @@ class_name Unit
 extends CharacterBody2D
 ## Shared targeting, melee movement, and cooldown-based combat.
 
+signal died(unit: Unit)
+
 enum Team { PLAYER, ENEMY }
 
 @export var team: Team = Team.PLAYER
@@ -103,6 +105,7 @@ func _die() -> void:
 	current_target = null
 	set_physics_process(false)
 	remove_from_group("units")
+	died.emit(self)
 	if _attack_tween != null:
 		_attack_tween.kill()
 	if _hit_tween != null:
