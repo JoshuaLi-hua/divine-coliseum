@@ -11,6 +11,13 @@ enum AttackMode { MELEE, PROJECTILE }
 @export var projectile_scene: PackedScene
 @export var projectile_speed: float = 650.0
 
+@export var block_enabled: bool = false
+@export_range(0.0, 1.0) var frontal_damage_reduction: float = 0.5
+@export_range(0.0, 360.0) var frontal_block_arc: float = 120.0
+var facing_direction: Vector2 = Vector2.LEFT
+var _block_tween: Tween
+var _visual_rest_scale: Vector2
+
 @export var team: Team = Team.PLAYER
 @export var unit_name: String = "Unit"
 @export var max_health: int = 1
@@ -34,6 +41,8 @@ var _visual_rest_position: Vector2
 
 
 func _ready() -> void:
+	_visual_rest_scale = _visual.scale
+	facing_direction = Vector2.RIGHT if team == Team.PLAYER else Vector2.LEFT
 	_visual_rest_modulate = _visual.modulate
 	_visual_rest_position = _visual.position
 	current_health = max_health
@@ -48,6 +57,7 @@ func _physics_process(delta: float) -> void:
 	if not _is_valid_opponent(current_target):
 		current_target = _find_nearest_opponent()
 
+	_update_facing()
 	velocity = Vector2.ZERO
 	if is_instance_valid(current_target):
 		var offset: Vector2 = current_target.global_position - global_position
@@ -89,15 +99,21 @@ func _try_attack() -> void:
 	if attack_mode == AttackMode.PROJECTILE:
 		_fire_projectile()
 	else:
-		current_target.take_damage(attack_damage)
+		current_target.take_damage(attack_damage, current_target.global_position.direction_to(global_position))
 	if not _is_valid_opponent(current_target):
 		current_target = null
 
 
-func take_damage(amount: int) -> void:
+func take_damage(amount: int, direction_to_source: Vector2 = Vector2.ZERO) -> void:
 	if is_dead or amount <= 0:
 		return
-	current_health = maxi(0, current_health - amount)
+	_update_facing()
+	var blocked: bool = block_enabled and not direction_to_source.is_zero_approx() and facing_direction.dot(direction_to_source.normalized()) >= cos(deg_to_rad(frontal_block_arc * 0.5)) - 0.000001
+	var final_damage: int = amount
+	if blocked:
+		final_damage = maxi(1, floori(float(amount) * (1.0 - frontal_damage_reduction)))
+		_play_block_cue()
+	current_health = maxi(0, current_health - final_damage)
 	_update_health_bar()
 	if current_health == 0:
 		_die()
@@ -118,6 +134,9 @@ func _die() -> void:
 		_attack_tween.kill()
 	if _hit_tween != null:
 		_hit_tween.kill()
+	if _block_tween != null:
+		_block_tween.kill()
+	_visual.scale = _visual_rest_scale
 	_health_bar.hide()
 	_visual.position = _visual_rest_position
 	_visual.modulate = _visual_rest_modulate
@@ -161,3 +180,28 @@ func _fire_projectile() -> void:
 	projectile.position = (get_parent() as Node2D).to_local(origin)
 	projectile.rotation = direction.angle()
 	get_parent().add_child(projectile)
+
+
+func _update_facing() -> void:
+	if not _is_valid_opponent(current_target):
+		return
+	var offset: Vector2 = current_target.global_position - global_position
+	if offset.is_zero_approx():
+		return
+	facing_direction = offset.normalized()
+	# Shield placeholders face left by default; mirror only the visual, not the body.
+	if block_enabled and absf(facing_direction.x) > 0.001:
+		var horizontal: float = -absf(_visual_rest_scale.x) if facing_direction.x > 0.0 else absf(_visual_rest_scale.x)
+		if horizontal != _visual_rest_scale.x:
+			if _block_tween != null:
+				_block_tween.kill()
+			_visual_rest_scale.x = horizontal
+			_visual.scale = _visual_rest_scale
+
+
+func _play_block_cue() -> void:
+	if _block_tween != null:
+		_block_tween.kill()
+	_visual.scale = _visual_rest_scale * 1.08
+	_block_tween = create_tween()
+	_block_tween.tween_property(_visual, "scale", _visual_rest_scale, 0.12)

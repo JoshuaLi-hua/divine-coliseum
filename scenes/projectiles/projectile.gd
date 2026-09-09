@@ -24,7 +24,7 @@ func _physics_process(delta: float) -> void:
 	if offset.length() <= step:
 		global_position = destination
 		_resolved = true
-		target.take_damage(damage)
+		target.take_damage(damage, -offset.normalized())
 		queue_free()
 	else:
 		global_position += offset.normalized() * step

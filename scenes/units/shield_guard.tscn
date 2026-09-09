@@ -4,6 +4,9 @@
 
 [node name="ShieldGuard" instance=ExtResource("1_unit")]
 team = 1
+block_enabled = true
+frontal_damage_reduction = 0.5
+frontal_block_arc = 120.0
 unit_name = "Shield Guard"
 max_health = 180
 move_speed = 80.0
