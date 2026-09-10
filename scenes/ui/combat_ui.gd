@@ -3,6 +3,9 @@ extends CanvasLayer
 const CARD_SCENE: PackedScene = preload("res://scenes/cards/card.tscn")
 const KNIGHT: CardData = preload("res://scenes/cards/ironbound_knight.tres")
 const MILITIA: CardData = preload("res://scenes/cards/arena_militia.tres")
+const SWORDSMAN: CardData = preload("res://scenes/cards/arena_swordsman.tres")
+const GUARD: CardData = preload("res://scenes/cards/shield_guard.tres")
+const ARCHER: CardData = preload("res://scenes/cards/arena_archer.tres")
 var deck: CombatDeck = CombatDeck.new()
 
 @onready var _battle: BattleManager = get_parent().get_node("BattleManager")
@@ -13,7 +16,7 @@ var deck: CombatDeck = CombatDeck.new()
 func _ready() -> void:
 	GameManager.divine_power_changed.connect(_update_power)
 	GameManager.reset_divine_power()
-	deck.initialize([KNIGHT, MILITIA, MILITIA, MILITIA])
+	deck.initialize([KNIGHT, MILITIA, MILITIA, SWORDSMAN, GUARD, ARCHER, ARCHER])
 	_rebuild_hand()
 	_battle.changed.connect(_update_battle)
 
