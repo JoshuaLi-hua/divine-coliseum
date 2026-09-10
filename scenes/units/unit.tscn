@@ -1,0 +1,44 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scenes/units/unit.gd" id="1_unit"]
+
+[sub_resource type="CapsuleShape2D" id="Capsule_unit"]
+radius = 10.0
+height = 28.0
+
+[node name="Unit" type="CharacterBody2D"]
+motion_mode = 1
+collision_layer = 2
+collision_mask = 1
+script = ExtResource("1_unit")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -14)
+shape = SubResource("Capsule_unit")
+
+[node name="HealthBar" type="Node2D" parent="."]
+position = Vector2(-20, -74)
+
+[node name="Border" type="ColorRect" parent="HealthBar"]
+offset_right = 40.0
+offset_bottom = 8.0
+mouse_filter = 2
+color = Color(0.04, 0.04, 0.04, 1)
+
+[node name="Background" type="ColorRect" parent="HealthBar"]
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 38.0
+offset_bottom = 6.0
+mouse_filter = 2
+color = Color(0.3, 0.3, 0.3, 1)
+
+[node name="Fill" type="ColorRect" parent="HealthBar"]
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 38.0
+offset_bottom = 6.0
+mouse_filter = 2
+color = Color(0.94, 0.94, 0.94, 1)

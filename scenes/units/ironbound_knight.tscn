@@ -1,0 +1,92 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1_unit"]
+
+[node name="IronboundKnight" instance=ExtResource("1_unit")]
+team = 0
+unit_name = "Ironbound Knight"
+max_health = 180
+move_speed = 120.0
+attack_damage = 17
+attack_range = 48.0
+attack_cooldown = 1.1
+
+[node name="Boots" type="Polygon2D" parent="Visual" index="0"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-12, -17, 12, -17, 12, -5, 16, -5, 16, 0, 2, 0, 0, -10, -2, 0, -16, 0, -16, -5, -12, -5)
+
+[node name="Greaves" type="Polygon2D" parent="Visual" index="1"]
+color = Color(0.72, 0.72, 0.72, 1)
+polygon = PackedVector2Array(-10, -18, -2, -18, -3, -5, -11, -5)
+
+[node name="RightGreave" type="Polygon2D" parent="Visual" index="2"]
+color = Color(0.72, 0.72, 0.72, 1)
+polygon = PackedVector2Array(2, -18, 10, -18, 11, -5, 3, -5)
+
+[node name="ArmorOutline" type="Polygon2D" parent="Visual" index="3"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-12, -43, 10, -43, 17, -36, 15, -24, 11, -23, 14, -15, -14, -15, -11, -24, -18, -27, -18, -36)
+
+[node name="Breastplate" type="Polygon2D" parent="Visual" index="4"]
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(-9, -41, 8, -41, 12, -34, 8, -25, -8, -25, -12, -34)
+
+[node name="ArmorShade" type="Polygon2D" parent="Visual" index="5"]
+color = Color(0.43, 0.43, 0.43, 1)
+polygon = PackedVector2Array(1, -40, 8, -40, 11, -34, 7, -26, 1, -26)
+
+[node name="Fauld" type="Polygon2D" parent="Visual" index="6"]
+color = Color(0.6, 0.6, 0.6, 1)
+polygon = PackedVector2Array(-8, -23, 8, -23, 11, -18, -11, -18)
+
+[node name="SwordOutline" type="Polygon2D" parent="Visual" index="7"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(21, -55, 26, -62, 31, -55, 29, -25, 34, -25, 34, -20, 28, -20, 28, -12, 22, -12, 22, -20, 16, -20, 16, -25, 21, -25)
+
+[node name="SwordBlade" type="Polygon2D" parent="Visual" index="8"]
+color = Color(0.94, 0.94, 0.94, 1)
+polygon = PackedVector2Array(24, -54, 26, -58, 28, -54, 26, -26, 23, -26)
+
+[node name="SwordGuard" type="Polygon2D" parent="Visual" index="9"]
+color = Color(0.72, 0.72, 0.72, 1)
+polygon = PackedVector2Array(18, -24, 32, -24, 32, -22, 18, -22)
+
+[node name="SwordGrip" type="Polygon2D" parent="Visual" index="10"]
+color = Color(0.43, 0.43, 0.43, 1)
+polygon = PackedVector2Array(24, -20, 26, -20, 26, -14, 24, -14)
+
+[node name="Gauntlet" type="Polygon2D" parent="Visual" index="11"]
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(13, -28, 20, -28, 23, -24, 21, -20, 14, -21)
+
+[node name="HelmetOutline" type="Polygon2D" parent="Visual" index="12"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-12, -55, -7, -60, 7, -60, 12, -55, 12, -41, 6, -36, -6, -36, -12, -41)
+
+[node name="Helmet" type="Polygon2D" parent="Visual" index="13"]
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(-9, -54, -5, -57, 5, -57, 9, -54, 9, -43, 4, -39, -4, -39, -9, -43)
+
+[node name="Visor" type="Polygon2D" parent="Visual" index="14"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-8, -50, 8, -50, 8, -46, 2, -46, 2, -41, -2, -41, -2, -46, -8, -46)
+
+[node name="HelmetRidge" type="Polygon2D" parent="Visual" index="15"]
+color = Color(0.94, 0.94, 0.94, 1)
+polygon = PackedVector2Array(-1, -57, 1, -57, 1, -51, -1, -51)
+
+[node name="ShieldOutline" type="Polygon2D" parent="Visual" index="16"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-24, -38, -12, -42, 0, -38, -1, -20, -12, -10, -23, -20)
+
+[node name="ShieldFace" type="Polygon2D" parent="Visual" index="17"]
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(-21, -36, -12, -39, -3, -36, -4, -22, -12, -14, -20, -22)
+
+[node name="ShieldInset" type="Polygon2D" parent="Visual" index="18"]
+color = Color(0.3, 0.3, 0.3, 1)
+polygon = PackedVector2Array(-18, -34, -12, -36, -6, -34, -7, -23, -12, -18, -17, -23)
+
+[node name="ShieldStripe" type="Polygon2D" parent="Visual" index="19"]
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(-13, -35, -11, -35, -11, -20, -13, -20)
