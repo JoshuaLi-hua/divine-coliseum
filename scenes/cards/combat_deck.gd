@@ -5,12 +5,16 @@ const HAND_SIZE: int = 3
 const MAX_UPGRADE_LEVEL: int = 3
 # Run-specific state keyed by the same immutable ID as definitions/piles.
 var _upgrade_levels: Dictionary[int, int] = {}
+var champion: ChampionState
 var definitions: Array[CardData] = []
 var draw_pile: Array[int] = []
 var hand: Array[int] = []
 var discard_pile: Array[int] = []
 
-func initialize(cards: Array[CardData]) -> void:
+func initialize(cards: Array[CardData], champion_state: ChampionState = null) -> void:
+	champion = champion_state
+	if champion != null and champion.selected != null:
+		champion.card_id = cards.find(champion.selected.card)
 	definitions = cards.duplicate()
 	_upgrade_levels.clear()
 	draw_pile.clear()
@@ -58,7 +62,7 @@ func get_all_logical_cards() -> Dictionary:
 	return cards
 
 func remove_card_by_id(id: int) -> bool:
-	if not get_all_logical_cards().has(id) or get_all_logical_cards().size() <= HAND_SIZE:
+	if is_champion(id) or not get_all_logical_cards().has(id) or get_all_logical_cards().size() <= HAND_SIZE:
 		return false
 	var was_in_hand: bool = hand.has(id)
 	draw_pile.erase(id)
@@ -92,4 +96,7 @@ func has_upgradeable_cards() -> bool:
 func card_caption(id: int) -> String:
 	if not _upgrade_levels.has(id):
 		return ""
-	return definitions[id].display_name + " " + "★".repeat(get_upgrade_level(id))
+	return definitions[id].display_name + " " + "★".repeat(get_upgrade_level(id)) + (" — CHAMPION" if is_champion(id) else "")
+
+func is_champion(id: int) -> bool:
+	return champion != null and champion.is_champion(id)

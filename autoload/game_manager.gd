@@ -41,3 +41,12 @@ func try_spend_gold(cost: int) -> bool:
 	gold -= cost
 	gold_changed.emit(gold)
 	return true
+
+const MAIN_CHAMPION: ChampionData = preload("res://scenes/champions/ironbound_knight.tres")
+var champion: ChampionState = ChampionState.new(MAIN_CHAMPION)
+
+func reset_champion() -> void:
+	champion = ChampionState.new(MAIN_CHAMPION)
+
+func try_learn_champion_skill(skill_id: StringName) -> bool:
+	return champion.try_learn(skill_id, try_spend_gold)

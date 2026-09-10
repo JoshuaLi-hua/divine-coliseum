@@ -5,11 +5,16 @@ signal removal_requested
 signal card_removal_requested(id: int)
 signal upgrade_requested
 signal card_upgrade_requested(id: int)
+signal training_requested
+signal skill_requested(id: StringName)
 signal leave_requested
 var offers: Array[Button] = []
 var gold_label: Label
 var remove_button: Button
 var upgrade_button: Button
+var training_button: Button
+var selection_title: Label
+var back_button: Button
 var selection_mode: String = ""
 var shop: VBoxContainer
 var selection: VBoxContainer
@@ -47,16 +52,23 @@ func _ready() -> void:
 	remove_button.pressed.connect(func() -> void: removal_requested.emit())
 	upgrade_button = _button("Upgrade a Card — 75 Gold", shop)
 	upgrade_button.pressed.connect(func() -> void: upgrade_requested.emit())
+	training_button = _button("Champion Training\nCost depends on selected skill", shop)
+	training_button.pressed.connect(func() -> void: training_requested.emit())
 	_button("Leave Shop", shop).pressed.connect(func() -> void: leave_requested.emit())
 	selection = VBoxContainer.new()
 	panel.add_child(selection)
+	selection_title = Label.new()
+	selection_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	selection_title.add_theme_font_size_override("font_size", 26)
+	selection.add_child(selection_title)
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size.y = 300
 	selection.add_child(scroll)
 	card_list = VBoxContainer.new()
 	card_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(card_list)
-	_button("Cancel", selection).pressed.connect(close_selection)
+	back_button = _button("Cancel", selection)
+	back_button.pressed.connect(close_selection)
 	close_selection()
 	hide()
 
@@ -84,6 +96,8 @@ func refresh(gold: int, purchased: Array[bool], deck_size: int, can_upgrade: boo
 	upgrade_button.disabled = gold < 75 or not can_upgrade
 
 func open_selection(cards: Dictionary, mode: String = "remove") -> void:
+	selection_title.hide()
+	back_button.text = "Cancel"
 	selection_mode = mode
 	for child: Node in card_list.get_children():
 		card_list.remove_child(child)
@@ -105,3 +119,23 @@ func close_selection() -> void:
 	selection_mode = ""
 	selection.hide()
 	shop.show()
+
+func open_training(champion: ChampionState, gold: int) -> void:
+	open_selection({}, "training")
+	selection_title.text = champion.selected.display_name.to_upper()
+	selection_title.show()
+	back_button.text = "Back"
+	for skill: ChampionSkill in champion.selected.skills:
+		var button := _button("", card_list)
+		button.set_meta("skill_id", skill.id)
+		button.pressed.connect(func() -> void: skill_requested.emit(skill.id))
+	refresh_training(champion, gold)
+
+func refresh_training(champion: ChampionState, gold: int) -> void:
+	if selection_mode != "training":
+		return
+	for button: Button in card_list.get_children():
+		var skill: ChampionSkill = champion.selected.find_skill(button.get_meta("skill_id"))
+		var learned: bool = champion.has_learned(skill.id)
+		button.text = skill.display_name + "\n" + skill.description() + "\n" + ("LEARNED" if learned else "Cost: %d Gold" % skill.gold_cost)
+		button.disabled = learned or gold < skill.gold_cost

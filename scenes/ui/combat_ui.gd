@@ -26,6 +26,8 @@ func _ready() -> void:
 	GameManager.reset_divine_power()
 	GameManager.gold_changed.connect(_update_gold)
 	GameManager.reset_gold()
+	GameManager.reset_champion()
+	GameManager.champion.changed.connect(_refresh_shop)
 	_reward = REWARD_OVERLAY.new()
 	$Screen.add_child(_reward)
 	_reward.reward_chosen.connect(_choose_reward)
@@ -37,8 +39,10 @@ func _ready() -> void:
 	_shop.card_removal_requested.connect(_remove_card)
 	_shop.upgrade_requested.connect(_open_upgrade)
 	_shop.card_upgrade_requested.connect(_upgrade_card)
+	_shop.training_requested.connect(_open_training)
+	_shop.skill_requested.connect(_learn_skill)
 	_shop.leave_requested.connect(_battle.leave_shop)
-	deck.initialize([KNIGHT, MILITIA, MILITIA, SWORDSMAN, GUARD, ARCHER, ARCHER])
+	deck.initialize([KNIGHT, MILITIA, MILITIA, SWORDSMAN, GUARD, ARCHER, ARCHER], GameManager.champion)
 	_rebuild_hand()
 	_battle.changed.connect(_update_battle)
 
@@ -56,6 +60,7 @@ func _rebuild_hand() -> void:
 		var card: SummonCard = CARD_SCENE.instantiate()
 		card.card_id = deck.hand[slot]
 		card.data = deck.definitions[card.card_id]
+		card.is_champion = deck.is_champion(card.card_id)
 		card.upgrade_level = deck.get_upgrade_level(card.card_id)
 		card.position = Vector2(float(slot) * 256.0 - (float(deck.hand.size()) * 256.0 - 16.0) / 2.0, 0)
 		_hand.add_child(card)
@@ -68,7 +73,7 @@ func _on_card_dropped(card: SummonCard, viewport_position: Vector2) -> void:
 	if _battle.between_battles or card.consumed or not deck.hand.has(card.card_id):
 		return
 	var data: CardData = deck.definitions[card.card_id]
-	if _region.try_summon(data.unit_scene, viewport_position, data.divine_power_cost, data, deck.get_upgrade_level(card.card_id)) == null:
+	if _region.try_summon(data.unit_scene, viewport_position, data.divine_power_cost, data, deck.get_upgrade_level(card.card_id), deck.champion, card.card_id) == null:
 		return
 	deck.play(card.card_id)
 	# Finish the input callback before replacing its UI nodes.
@@ -112,6 +117,7 @@ func _continue_reward() -> void:
 func _refresh_shop() -> void:
 	if is_instance_valid(_shop):
 		_shop.refresh(GameManager.gold, _purchased, deck.get_all_logical_cards().size(), deck.has_upgradeable_cards())
+		_shop.refresh_training(GameManager.champion, GameManager.gold)
 
 func _buy_card(index: int) -> void:
 	if not _battle.shop_open or _shop.selecting or index < 0 or index >= SHOP_PRICES.size() or _purchased[index]:
@@ -140,7 +146,7 @@ func _remove_card(id: int) -> void:
 func _selection_captions(upgrade_only: bool) -> Dictionary:
 	var captions: Dictionary = {}
 	for id: int in deck.get_all_logical_cards():
-		if not upgrade_only or deck.can_upgrade(id):
+		if (upgrade_only and deck.can_upgrade(id)) or (not upgrade_only and not deck.is_champion(id)):
 			captions[id] = deck.card_caption(id)
 	return captions
 
@@ -157,3 +163,11 @@ func _upgrade_card(id: int) -> void:
 	_shop.close_selection()
 	_rebuild_hand()
 	_refresh_shop()
+
+func _open_training() -> void:
+	if _battle.shop_open:
+		_shop.open_training(GameManager.champion, GameManager.gold)
+
+func _learn_skill(skill_id: StringName) -> void:
+	if _battle.shop_open and _shop.selecting and _shop.selection_mode == "training":
+		GameManager.try_learn_champion_skill(skill_id)

@@ -4,6 +4,7 @@ extends Panel
 signal dragging_changed(active: bool)
 signal dropped(card: SummonCard, viewport_position: Vector2)
 @export var data: CardData
+var is_champion: bool = false
 var upgrade_level: int = 1
 var card_id: int = -1
 var consumed: bool = false
@@ -13,6 +14,16 @@ var _home: Vector2
 var _grab_offset: Vector2
 
 func _ready() -> void:
+	if is_champion:
+		var badge := Label.new()
+		badge.name = "ChampionBadge"
+		badge.text = "CHAMPION"
+		badge.position = Vector2(12, 1)
+		badge.size.x = 216
+		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		badge.add_theme_font_size_override("font_size", 12)
+		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(badge)
 	$Name.text = data.display_name
 	$Cost.text = "★".repeat(upgrade_level) + "  |  Cost: %d" % data.divine_power_cost
 

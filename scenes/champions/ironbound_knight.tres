@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ChampionData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scenes/champions/champion_data.gd" id="1"]
+[ext_resource type="Script" path="res://scenes/champions/champion_skill.gd" id="2"]
+[ext_resource type="Resource" path="res://scenes/cards/ironbound_knight.tres" id="3"]
+
+[sub_resource type="Resource" id="Constitution"]
+script = ExtResource("2")
+id = &"iron_constitution"
+display_name = "Iron Constitution"
+gold_cost = 100
+bonus_health = 40
+
+[sub_resource type="Resource" id="Strikes"]
+script = ExtResource("2")
+id = &"heavy_strikes"
+display_name = "Heavy Strikes"
+gold_cost = 100
+bonus_damage = 4
+
+[resource]
+script = ExtResource("1")
+id = &"ironbound_knight"
+display_name = "Ironbound Knight"
+card = ExtResource("3")
+skills = Array[ExtResource("2")]([SubResource("Constitution"), SubResource("Strikes")])
