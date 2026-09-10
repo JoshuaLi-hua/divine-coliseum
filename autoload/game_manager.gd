@@ -34,3 +34,10 @@ func add_gold(amount: int) -> void:
 	if amount > 0:
 		gold += amount
 		gold_changed.emit(gold)
+
+func try_spend_gold(cost: int) -> bool:
+	if cost < 0 or gold < cost:
+		return false
+	gold -= cost
+	gold_changed.emit(gold)
+	return true

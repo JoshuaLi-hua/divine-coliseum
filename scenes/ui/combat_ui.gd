@@ -2,6 +2,10 @@ extends CanvasLayer
 
 const REWARD_OVERLAY = preload("res://scenes/ui/reward_overlay.gd")
 var _reward: Control
+const SHOP_OVERLAY = preload("res://scenes/ui/shop_overlay.gd")
+const SHOP_PRICES: Array[int] = [60, 90, 80]
+var _shop: Control
+var _purchased: Array[bool] = [false, false, false]
 
 const CARD_SCENE: PackedScene = preload("res://scenes/cards/card.tscn")
 const KNIGHT: CardData = preload("res://scenes/cards/ironbound_knight.tres")
@@ -25,6 +29,12 @@ func _ready() -> void:
 	$Screen.add_child(_reward)
 	_reward.reward_chosen.connect(_choose_reward)
 	_reward.continued.connect(_continue_reward)
+	_shop = SHOP_OVERLAY.new()
+	$Screen.add_child(_shop)
+	_shop.purchase_requested.connect(_buy_card)
+	_shop.removal_requested.connect(_open_removal)
+	_shop.card_removal_requested.connect(_remove_card)
+	_shop.leave_requested.connect(_battle.leave_shop)
 	deck.initialize([KNIGHT, MILITIA, MILITIA, SWORDSMAN, GUARD, ARCHER, ARCHER])
 	_rebuild_hand()
 	_battle.changed.connect(_update_battle)
@@ -66,11 +76,13 @@ func _on_card_dropped(card: SummonCard, viewport_position: Vector2) -> void:
 func _update_battle() -> void:
 	$Screen/BattleStatus.text = "Battle %d / %d\nEnemies: %d" % [_battle.current_battle, _battle.BATTLES.size(), _battle.active_enemies.size()]
 	$Screen/BattleMessage.text = "VICTORY" if _battle.victory else ("BATTLE CLEARED" if _battle.between_battles else "")
-	if _battle.between_battles:
+	if _battle.between_battles and not _battle.shop_open:
 		if not _reward.visible:
 			_reward.open()
 	else:
 		_reward.hide()
+	_shop.visible = _battle.shop_open
+	_refresh_shop()
 	for card: SummonCard in _hand.get_children():
 		card.set_interaction_locked(_battle.between_battles)
 	if _battle.between_battles:
@@ -78,6 +90,7 @@ func _update_battle() -> void:
 
 func _update_gold(value: int) -> void:
 	$Screen/Gold.text = "Gold: %d" % value
+	_refresh_shop()
 
 func _choose_reward(index: int) -> void:
 	if index < 0 or index > 2 or not _battle.claim_reward():
@@ -91,3 +104,31 @@ func _choose_reward(index: int) -> void:
 
 func _continue_reward() -> void:
 	_battle.continue_after_reward()
+
+func _refresh_shop() -> void:
+	if is_instance_valid(_shop):
+		_shop.refresh(GameManager.gold, _purchased, deck.get_all_logical_cards().size())
+
+func _buy_card(index: int) -> void:
+	if not _battle.shop_open or _shop.selecting or index < 0 or index >= SHOP_PRICES.size() or _purchased[index]:
+		return
+	if not GameManager.try_spend_gold(SHOP_PRICES[index]):
+		return
+	_purchased[index] = true
+	deck.add_card([SWORDSMAN, GUARD, ARCHER][index])
+	_rebuild_hand()
+	_refresh_shop()
+
+func _open_removal() -> void:
+	if _battle.shop_open and GameManager.gold >= 50 and deck.get_all_logical_cards().size() > 3:
+		_shop.open_selection(deck.get_all_logical_cards())
+
+func _remove_card(id: int) -> void:
+	if not _battle.shop_open or not _shop.selecting or GameManager.gold < 50:
+		return
+	if not deck.remove_card_by_id(id):
+		return
+	GameManager.try_spend_gold(50)
+	_shop.close_selection()
+	_rebuild_hand()
+	_refresh_shop()

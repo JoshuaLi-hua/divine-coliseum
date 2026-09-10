@@ -34,9 +34,32 @@ func _draw_to_hand() -> void:
 			draw_pile.shuffle()
 		hand.append(draw_pile.pop_back())
 
-func add_reward(data: CardData) -> int:
+func add_card(data: CardData) -> int:
 	# Definitions are append-only: the next index is always a fresh logical ID.
 	var card_id: int = definitions.size()
 	definitions.append(data)
 	discard_pile.append(card_id)
 	return card_id
+
+func add_reward(data: CardData) -> int:
+	return add_card(data)
+
+func get_all_logical_cards() -> Dictionary:
+	var cards: Dictionary = {}
+	for id: int in range(definitions.size()):
+		if definitions[id] != null:
+			cards[id] = definitions[id]
+	return cards
+
+func remove_card_by_id(id: int) -> bool:
+	if not get_all_logical_cards().has(id) or get_all_logical_cards().size() <= HAND_SIZE:
+		return false
+	var was_in_hand: bool = hand.has(id)
+	draw_pile.erase(id)
+	hand.erase(id)
+	discard_pile.erase(id)
+	# Keep the index reserved forever; surviving IDs never shift.
+	definitions[id] = null
+	if was_in_hand:
+		_draw_to_hand()
+	return true

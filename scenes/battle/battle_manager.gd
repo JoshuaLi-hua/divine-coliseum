@@ -18,12 +18,16 @@ var active_enemies: Array[Unit] = []
 var between_battles: bool = false
 var victory: bool = false
 var reward_selected: bool = false
+var shop_open: bool = false
+var shop_visited: bool = false
 @onready var _arena: Node2D = get_parent().get_node("Arena")
 
 func _ready() -> void:
 	_start_next_battle.call_deferred()
 
 func _start_next_battle() -> void:
+	if shop_open or (current_battle == 2 and not shop_visited):
+		return
 	if (current_battle > 0 and not reward_selected) or victory or not active_enemies.is_empty() or current_battle >= BATTLES.size():
 		return
 	between_battles = false
@@ -58,5 +62,17 @@ func claim_reward() -> bool:
 	return true
 
 func continue_after_reward() -> void:
-	if between_battles and reward_selected and not victory:
+	if not between_battles or not reward_selected or victory or shop_open:
+		return
+	if current_battle == 2 and not shop_visited:
+		shop_open = true
+		changed.emit()
+	else:
 		_start_next_battle()
+
+func leave_shop() -> void:
+	if not shop_open:
+		return
+	shop_open = false
+	shop_visited = true
+	_start_next_battle()
