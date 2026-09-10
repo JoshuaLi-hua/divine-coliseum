@@ -4,6 +4,7 @@ extends Panel
 signal dragging_changed(active: bool)
 signal dropped(card: SummonCard, viewport_position: Vector2)
 @export var data: CardData
+var upgrade_level: int = 1
 var card_id: int = -1
 var consumed: bool = false
 var interaction_locked: bool = false
@@ -13,7 +14,7 @@ var _grab_offset: Vector2
 
 func _ready() -> void:
 	$Name.text = data.display_name
-	$Cost.text = "Cost: %d" % data.divine_power_cost
+	$Cost.text = "★".repeat(upgrade_level) + "  |  Cost: %d" % data.divine_power_cost
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and not consumed and not interaction_locked:

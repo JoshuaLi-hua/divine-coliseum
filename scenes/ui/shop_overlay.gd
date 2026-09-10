@@ -3,10 +3,14 @@ extends Control
 signal purchase_requested(index: int)
 signal removal_requested
 signal card_removal_requested(id: int)
+signal upgrade_requested
+signal card_upgrade_requested(id: int)
 signal leave_requested
 var offers: Array[Button] = []
 var gold_label: Label
 var remove_button: Button
+var upgrade_button: Button
+var selection_mode: String = ""
 var shop: VBoxContainer
 var selection: VBoxContainer
 var card_list: VBoxContainer
@@ -41,6 +45,8 @@ func _ready() -> void:
 		offers.append(button)
 	remove_button = _button("Remove a Card — 50 Gold", shop)
 	remove_button.pressed.connect(func() -> void: removal_requested.emit())
+	upgrade_button = _button("Upgrade a Card — 75 Gold", shop)
+	upgrade_button.pressed.connect(func() -> void: upgrade_requested.emit())
 	_button("Leave Shop", shop).pressed.connect(func() -> void: leave_requested.emit())
 	selection = VBoxContainer.new()
 	panel.add_child(selection)
@@ -70,24 +76,32 @@ func _button(caption: String, parent: Node) -> Button:
 	parent.add_child(button)
 	return button
 
-func refresh(gold: int, purchased: Array[bool], deck_size: int) -> void:
+func refresh(gold: int, purchased: Array[bool], deck_size: int, can_upgrade: bool = false) -> void:
 	gold_label.text = "Gold: %d" % gold
 	for index: int in range(3):
 		offers[index].disabled = purchased[index] or gold < [60, 90, 80][index]
 	remove_button.disabled = gold < 50 or deck_size <= 3
+	upgrade_button.disabled = gold < 75 or not can_upgrade
 
-func open_selection(cards: Dictionary) -> void:
+func open_selection(cards: Dictionary, mode: String = "remove") -> void:
+	selection_mode = mode
 	for child: Node in card_list.get_children():
 		card_list.remove_child(child)
 		child.queue_free()
 	for id: int in cards:
-		var button := _button(cards[id].display_name, card_list)
-		button.pressed.connect(func() -> void: card_removal_requested.emit(id))
+		var button := _button(str(cards[id]), card_list)
+		button.pressed.connect(func() -> void:
+			if selection_mode == "upgrade":
+				card_upgrade_requested.emit(id)
+			else:
+				card_removal_requested.emit(id)
+		)
 	selecting = true
 	shop.hide()
 	selection.show()
 
 func close_selection() -> void:
 	selecting = false
+	selection_mode = ""
 	selection.hide()
 	shop.show()

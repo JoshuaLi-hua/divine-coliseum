@@ -6,3 +6,5 @@ script = ExtResource("1")
 display_name = "Arena Archer"
 divine_power_cost = 3
 unit_scene = ExtResource("2")
+health_by_level = Array[int]([55, 70, 90])
+damage_by_level = Array[int]([12, 15, 18])

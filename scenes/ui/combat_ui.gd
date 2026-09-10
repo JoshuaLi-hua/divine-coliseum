@@ -3,6 +3,7 @@ extends CanvasLayer
 const REWARD_OVERLAY = preload("res://scenes/ui/reward_overlay.gd")
 var _reward: Control
 const SHOP_OVERLAY = preload("res://scenes/ui/shop_overlay.gd")
+const UPGRADE_COST: int = 75
 const SHOP_PRICES: Array[int] = [60, 90, 80]
 var _shop: Control
 var _purchased: Array[bool] = [false, false, false]
@@ -34,6 +35,8 @@ func _ready() -> void:
 	_shop.purchase_requested.connect(_buy_card)
 	_shop.removal_requested.connect(_open_removal)
 	_shop.card_removal_requested.connect(_remove_card)
+	_shop.upgrade_requested.connect(_open_upgrade)
+	_shop.card_upgrade_requested.connect(_upgrade_card)
 	_shop.leave_requested.connect(_battle.leave_shop)
 	deck.initialize([KNIGHT, MILITIA, MILITIA, SWORDSMAN, GUARD, ARCHER, ARCHER])
 	_rebuild_hand()
@@ -53,6 +56,7 @@ func _rebuild_hand() -> void:
 		var card: SummonCard = CARD_SCENE.instantiate()
 		card.card_id = deck.hand[slot]
 		card.data = deck.definitions[card.card_id]
+		card.upgrade_level = deck.get_upgrade_level(card.card_id)
 		card.position = Vector2(float(slot) * 256.0 - (float(deck.hand.size()) * 256.0 - 16.0) / 2.0, 0)
 		_hand.add_child(card)
 		card.set_interaction_locked(_battle.between_battles)
@@ -64,7 +68,7 @@ func _on_card_dropped(card: SummonCard, viewport_position: Vector2) -> void:
 	if _battle.between_battles or card.consumed or not deck.hand.has(card.card_id):
 		return
 	var data: CardData = deck.definitions[card.card_id]
-	if _region.try_summon(data.unit_scene, viewport_position, data.divine_power_cost) == null:
+	if _region.try_summon(data.unit_scene, viewport_position, data.divine_power_cost, data, deck.get_upgrade_level(card.card_id)) == null:
 		return
 	deck.play(card.card_id)
 	# Finish the input callback before replacing its UI nodes.
@@ -107,7 +111,7 @@ func _continue_reward() -> void:
 
 func _refresh_shop() -> void:
 	if is_instance_valid(_shop):
-		_shop.refresh(GameManager.gold, _purchased, deck.get_all_logical_cards().size())
+		_shop.refresh(GameManager.gold, _purchased, deck.get_all_logical_cards().size(), deck.has_upgradeable_cards())
 
 func _buy_card(index: int) -> void:
 	if not _battle.shop_open or _shop.selecting or index < 0 or index >= SHOP_PRICES.size() or _purchased[index]:
@@ -121,14 +125,35 @@ func _buy_card(index: int) -> void:
 
 func _open_removal() -> void:
 	if _battle.shop_open and GameManager.gold >= 50 and deck.get_all_logical_cards().size() > 3:
-		_shop.open_selection(deck.get_all_logical_cards())
+		_shop.open_selection(_selection_captions(false))
 
 func _remove_card(id: int) -> void:
-	if not _battle.shop_open or not _shop.selecting or GameManager.gold < 50:
+	if not _battle.shop_open or not _shop.selecting or _shop.selection_mode != "remove" or GameManager.gold < 50:
 		return
 	if not deck.remove_card_by_id(id):
 		return
 	GameManager.try_spend_gold(50)
+	_shop.close_selection()
+	_rebuild_hand()
+	_refresh_shop()
+
+func _selection_captions(upgrade_only: bool) -> Dictionary:
+	var captions: Dictionary = {}
+	for id: int in deck.get_all_logical_cards():
+		if not upgrade_only or deck.can_upgrade(id):
+			captions[id] = deck.card_caption(id)
+	return captions
+
+func _open_upgrade() -> void:
+	if _battle.shop_open and GameManager.gold >= UPGRADE_COST and deck.has_upgradeable_cards():
+		_shop.open_selection(_selection_captions(true), "upgrade")
+
+func _upgrade_card(id: int) -> void:
+	if not _battle.shop_open or not _shop.selecting or _shop.selection_mode != "upgrade" or GameManager.gold < UPGRADE_COST:
+		return
+	if not deck.upgrade_card(id):
+		return
+	GameManager.try_spend_gold(UPGRADE_COST)
 	_shop.close_selection()
 	_rebuild_hand()
 	_refresh_shop()

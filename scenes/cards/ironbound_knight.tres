@@ -6,3 +6,5 @@ script = ExtResource("1")
 display_name = "Ironbound Knight"
 divine_power_cost = 3
 unit_scene = ExtResource("2")
+health_by_level = Array[int]([180, 220, 270])
+damage_by_level = Array[int]([17, 21, 26])

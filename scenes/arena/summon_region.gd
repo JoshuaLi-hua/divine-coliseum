@@ -6,7 +6,7 @@ func _draw() -> void:
 	draw_rect(SUMMON_RECT, Color(1, 1, 1, 0.08))
 	draw_rect(SUMMON_RECT, Color(0.94, 0.94, 0.94, 0.8), false, 2.0)
 
-func try_summon(unit_scene: PackedScene, viewport_position: Vector2, cost: int) -> Unit:
+func try_summon(unit_scene: PackedScene, viewport_position: Vector2, cost: int, card_data: CardData = null, upgrade_level: int = 1) -> Unit:
 	var world_position: Vector2 = get_canvas_transform().affine_inverse() * viewport_position
 	if not SUMMON_RECT.has_point(to_local(world_position)) or unit_scene == null:
 		return null
@@ -20,6 +20,8 @@ func try_summon(unit_scene: PackedScene, viewport_position: Vector2, cost: int) 
 		instance.free()
 		return null
 	summoned.team = Unit.Team.PLAYER
+	if card_data != null:
+		card_data.apply_summon_stats(summoned, upgrade_level)
 	summoned.position = get_parent().to_local(world_position)
 	get_parent().add_child(summoned)
 	return summoned

@@ -6,3 +6,5 @@ script = ExtResource("1")
 display_name = "Arena Swordsman"
 divine_power_cost = 2
 unit_scene = ExtResource("2")
+health_by_level = Array[int]([90, 115, 145])
+damage_by_level = Array[int]([14, 17, 21])

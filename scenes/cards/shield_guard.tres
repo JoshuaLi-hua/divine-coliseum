@@ -6,3 +6,6 @@ script = ExtResource("1")
 display_name = "Shield Guard"
 divine_power_cost = 3
 unit_scene = ExtResource("2")
+health_by_level = Array[int]([180, 220, 270])
+damage_by_level = Array[int]([7, 8, 10])
+block_by_level = Array[float]([0.5, 0.55, 0.6])

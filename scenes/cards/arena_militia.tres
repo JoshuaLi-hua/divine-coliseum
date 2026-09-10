@@ -6,3 +6,5 @@ script = ExtResource("1")
 display_name = "Arena Militia"
 divine_power_cost = 1
 unit_scene = ExtResource("2")
+health_by_level = Array[int]([50, 65, 80])
+damage_by_level = Array[int]([8, 10, 12])
