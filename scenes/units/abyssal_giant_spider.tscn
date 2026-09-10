@@ -1,0 +1,87 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1"]
+[ext_resource type="Resource" path="res://scenes/monsters/abyssal_giant_spider.tres" id="2"]
+[node name="AbyssalGiantSpider" instance=ExtResource("1")]
+team = 1
+monster = ExtResource("2")
+unit_name = "Abyssal Giant Spider"
+max_health = 80
+move_speed = 155.0
+attack_damage = 11
+attack_range = 44.0
+attack_cooldown = 0.75
+
+[node name="HealthBar" parent="." index="2"]
+position = Vector2(-20, -59)
+
+[node name="LLeg0" type="Polygon2D" parent="Visual" index="0"]
+color = Color(0.4, 0.4, 0.4, 1)
+polygon = PackedVector2Array(-10, -29, -28, -37, -48, -44, -51, -31, -45, -41, -28, -31, -11, -24)
+
+[node name="LLeg1" type="Polygon2D" parent="Visual" index="1"]
+color = Color(0.6, 0.6, 0.6, 1)
+polygon = PackedVector2Array(-10, -22, -28, -30, -48, -27, -51, -14, -45, -24, -28, -24, -11, -17)
+
+[node name="LLeg2" type="Polygon2D" parent="Visual" index="2"]
+color = Color(0.4, 0.4, 0.4, 1)
+polygon = PackedVector2Array(-10, -15, -28, -23, -48, -7, -51, 6, -45, -4, -28, -17, -11, -10)
+
+[node name="LLeg3" type="Polygon2D" parent="Visual" index="3"]
+color = Color(0.6, 0.6, 0.6, 1)
+polygon = PackedVector2Array(-10, -8, -28, -16, -48, 7, -51, 20, -45, 10, -28, -10, -11, -3)
+
+[node name="RLeg0" type="Polygon2D" parent="Visual" index="4"]
+color = Color(0.4, 0.4, 0.4, 1)
+polygon = PackedVector2Array(10, -29, 28, -37, 48, -44, 51, -31, 45, -41, 28, -31, 11, -24)
+
+[node name="RLeg1" type="Polygon2D" parent="Visual" index="5"]
+color = Color(0.6, 0.6, 0.6, 1)
+polygon = PackedVector2Array(10, -22, 28, -30, 48, -27, 51, -14, 45, -24, 28, -24, 11, -17)
+
+[node name="RLeg2" type="Polygon2D" parent="Visual" index="6"]
+color = Color(0.4, 0.4, 0.4, 1)
+polygon = PackedVector2Array(10, -15, 28, -23, 48, -7, 51, 6, 45, -4, 28, -17, 11, -10)
+
+[node name="RLeg3" type="Polygon2D" parent="Visual" index="7"]
+color = Color(0.6, 0.6, 0.6, 1)
+polygon = PackedVector2Array(10, -8, 28, -16, 48, 7, 51, 20, 45, 10, 28, -10, 11, -3)
+
+[node name="AbdomenOutline" type="Polygon2D" parent="Visual" index="8"]
+color = Color(0.08, 0.08, 0.08, 1)
+polygon = PackedVector2Array(-16, -40, 0, -48, 17, -41, 22, -26, 15, -13, -14, -13, -22, -26)
+
+[node name="Abdomen" type="Polygon2D" parent="Visual" index="9"]
+color = Color(0.25, 0.25, 0.25, 1)
+polygon = PackedVector2Array(-13, -37, 0, -44, 13, -38, 17, -26, 10, -17, -11, -17, -17, -26)
+
+[node name="ShellRidge" type="Polygon2D" parent="Visual" index="10"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(-2, -42, 2, -42, 6, -27, 1, -20, -3, -27)
+
+[node name="Head" type="Polygon2D" parent="Visual" index="11"]
+color = Color(0.08, 0.08, 0.08, 1)
+polygon = PackedVector2Array(-14, -18, -7, -24, 9, -24, 17, -14, 11, -3, -9, -3, -17, -11)
+
+[node name="Eye0" type="Polygon2D" parent="Visual" index="12"]
+color = Color(0.95, 0.95, 0.95, 1)
+polygon = PackedVector2Array(-9, -15, -6, -15, -6, -12, -9, -12)
+
+[node name="Eye1" type="Polygon2D" parent="Visual" index="13"]
+color = Color(0.95, 0.95, 0.95, 1)
+polygon = PackedVector2Array(-3, -15, 0, -15, 0, -12, -3, -12)
+
+[node name="Eye2" type="Polygon2D" parent="Visual" index="14"]
+color = Color(0.95, 0.95, 0.95, 1)
+polygon = PackedVector2Array(3, -15, 6, -15, 6, -12, 3, -12)
+
+[node name="Eye3" type="Polygon2D" parent="Visual" index="15"]
+color = Color(0.95, 0.95, 0.95, 1)
+polygon = PackedVector2Array(9, -15, 12, -15, 12, -12, 9, -12)
+
+[node name="FangLeft" type="Polygon2D" parent="Visual" index="16"]
+color = Color(0.72, 0.72, 0.72, 1)
+polygon = PackedVector2Array(-8, -6, -3, -5, -5, 3, -11, -1)
+
+[node name="FangRight" type="Polygon2D" parent="Visual" index="17"]
+color = Color(0.72, 0.72, 0.72, 1)
+polygon = PackedVector2Array(3, -5, 8, -6, 11, -1, 5, 3)

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scenes/cards/card_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/units/wasteland_orc.tscn" id="2"]
+[resource]
+script = ExtResource("1")
+display_name = "Wasteland Orc"
+divine_power_cost = 2
+unit_scene = ExtResource("2")
+health_by_level = Array[int]([125, 155, 195])
+damage_by_level = Array[int]([16, 20, 25])

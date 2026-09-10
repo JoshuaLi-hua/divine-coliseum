@@ -19,6 +19,8 @@ var _block_tween: Tween
 var _visual_rest_scale: Vector2
 
 @export var team: Team = Team.PLAYER
+@export var monster: MonsterData
+@export var engagement_body_radius: float = 0.0
 @export var unit_name: String = "Unit"
 @export var max_health: int = 1
 @export var move_speed: float = 0.0
@@ -58,6 +60,9 @@ var engagement_slot: int = -1
 var _slot_target: Unit
 var _slot_owners: Dictionary[int, int] = {}
 var _slot_rotation: float = 0.0
+var _last_positioning_velocity: Vector2 = Vector2.ZERO
+var _steady_motion_time: float = 0.0
+var _drift_partner_id: int = 0
 
 func _release_slot() -> void:
 	if is_instance_valid(_slot_target):
@@ -87,7 +92,7 @@ func _reserve_slot(attacker: Unit) -> int:
 		for index: int in range(ring * SLOT_COUNT, (ring + 1) * SLOT_COUNT):
 			if _slot_owners.has(index):
 				continue
-			var distance: float = attacker.global_position.distance_squared_to(_slot_position(index, attacker.attack_range))
+			var distance: float = attacker.global_position.distance_squared_to(_slot_position(index, attacker.attack_range, attacker.engagement_body_radius))
 			if distance < best_distance:
 				best_distance = distance
 				best = index
@@ -107,9 +112,15 @@ func _has_inner_vacancy() -> bool:
 			return true
 	return false
 
-func _slot_position(index: int, reach: float) -> Vector2:
+func _slot_position(index: int, reach: float, attacker_body_radius: float = 0.0) -> Vector2:
 	var ring: int = index / SLOT_COUNT
-	var radius: float = minf(SLOT_RADIUS, maxf(0.0, reach - 4.0)) + ring * ALLY_SPACING
+	var radius: float = minf(SLOT_RADIUS, maxf(0.0, reach - 4.0))
+	var extra: float = engagement_body_radius + attacker_body_radius
+	if extra > 0.0:
+		# Use a symmetric radius for a large-unit pair, capped by both reaches.
+		var shared_reach: float = minf(reach, attack_range) if attack_mode == AttackMode.MELEE else reach
+		radius = minf(SLOT_RADIUS, maxf(0.0, shared_reach - 4.0)) + extra
+	radius += ring * (ALLY_SPACING + extra)
 	return global_position + Vector2.from_angle(_slot_rotation + (index % SLOT_COUNT) * TAU / SLOT_COUNT) * radius
 
 func _ally_separation() -> Vector2:
@@ -120,7 +131,8 @@ func _ally_separation() -> Vector2:
 			continue
 		var offset: Vector2 = global_position - ally.global_position
 		var distance: float = offset.length()
-		if distance >= ALLY_SPACING:
+		var spacing: float = ALLY_SPACING + engagement_body_radius + ally.engagement_body_radius
+		if distance >= spacing:
 			continue
 		if distance < 0.001:
 			# Antisymmetric, deterministic tie break for exact spawn stacking.
@@ -128,7 +140,7 @@ func _ally_separation() -> Vector2:
 			offset = Vector2.from_angle(deg_to_rad(angle)) * (1.0 if get_instance_id() < ally.get_instance_id() else -1.0)
 		else:
 			offset /= distance
-		push += offset * (ALLY_SPACING - distance) * 4.0
+		push += offset * (spacing - distance) * 4.0
 	return push.limit_length(60.0)
 
 func _physics_process(delta: float) -> void:
@@ -140,7 +152,6 @@ func _physics_process(delta: float) -> void:
 	if _slot_target != current_target or attack_mode != AttackMode.MELEE:
 		_release_slot()
 	_update_facing()
-	var desired: Vector2 = Vector2.ZERO
 	if _is_valid_opponent(current_target):
 		var distance: float = global_position.distance_to(current_target.global_position)
 		if attack_mode == AttackMode.MELEE:
@@ -152,22 +163,47 @@ func _physics_process(delta: float) -> void:
 				_release_slot()
 				_slot_target = current_target
 				engagement_slot = current_target._reserve_slot(self)
-			var destination: Vector2 = current_target._slot_position(engagement_slot, attack_range)
+			var destination: Vector2 = current_target._slot_position(engagement_slot, attack_range, engagement_body_radius)
 			var offset: Vector2 = destination - global_position
-			desired = (offset * 6.0).limit_length(move_speed)
-			if offset.length() <= 7.0 and distance <= attack_range:
+			if offset.length() <= 7.0 and distance <= _attack_reach():
 				_try_attack()
 		else:
-			var remaining: float = distance - (attack_range - 2.0)
-			if remaining > 0.0:
-				desired = global_position.direction_to(current_target.global_position) * minf(move_speed, remaining * 6.0)
 			if distance <= attack_range:
 				_try_attack()
-	velocity = (desired + _ally_separation()).limit_length(move_speed)
+	if not _is_valid_opponent(current_target) or current_target.get_instance_id() != _drift_partner_id or current_target.current_target != self:
+		_drift_partner_id = 0
+	velocity = _positioning_velocity()
+	_steady_motion_time = _steady_motion_time + delta if velocity.distance_squared_to(_last_positioning_velocity) < 0.25 else 0.0
+	_last_positioning_velocity = velocity
+	if _is_valid_opponent(current_target) and current_target.current_target == self:
+		if engagement_slot >= 0 or current_target.engagement_slot >= 0:
+			# For a mutually targeting pair, separation can push both fighters in the
+			# same direction forever. Remove only that common translation;
+			# retain relative steering toward their distinct moving slots.
+			var opposing_velocity: Vector2 = current_target._positioning_velocity()
+			if velocity.dot(opposing_velocity) > 0.0 and _steady_motion_time >= 0.5 and current_target._steady_motion_time >= 0.5:
+				_drift_partner_id = current_target.get_instance_id()
+				current_target._drift_partner_id = get_instance_id()
+			# Keep the correction until this mutual target relationship ends.
+			if _drift_partner_id != 0:
+				velocity = (velocity - opposing_velocity) * 0.5
+	velocity = velocity.limit_length(move_speed)
 	if velocity.length() < 0.5:
 		velocity = Vector2.ZERO
 	move_and_slide()
 
+
+func _positioning_velocity() -> Vector2:
+	var desired: Vector2 = Vector2.ZERO
+	if _is_valid_opponent(current_target):
+		if attack_mode == AttackMode.MELEE and engagement_slot >= 0:
+			var offset: Vector2 = current_target._slot_position(engagement_slot, attack_range, engagement_body_radius) - global_position
+			desired = (offset * 6.0).limit_length(move_speed)
+		elif attack_mode == AttackMode.PROJECTILE:
+			var remaining: float = global_position.distance_to(current_target.global_position) - (attack_range - 2.0)
+			if remaining > 0.0:
+				desired = global_position.direction_to(current_target.global_position) * minf(move_speed, remaining * 6.0)
+	return (desired + _ally_separation()).limit_length(move_speed)
 
 func _find_nearest_opponent() -> Unit:
 	var nearest: Unit = null
@@ -187,10 +223,17 @@ func _is_valid_opponent(candidate: Unit) -> bool:
 	return is_instance_valid(candidate) and candidate != self and candidate.is_inside_tree() and not candidate.is_queued_for_deletion() and not candidate.is_dead and candidate.team != team
 
 
+# Melee reach is measured from body edges; ranged distance remains unchanged.
+func _attack_reach() -> float:
+	if attack_mode == AttackMode.MELEE and _is_valid_opponent(current_target):
+		return attack_range + engagement_body_radius + current_target.engagement_body_radius
+	return attack_range
+
+
 func _try_attack() -> void:
 	if is_dead or _attack_time_left > 0.0 or not _is_valid_opponent(current_target):
 		return
-	if global_position.distance_to(current_target.global_position) > attack_range:
+	if global_position.distance_to(current_target.global_position) > _attack_reach():
 		return
 	_attack_time_left = attack_cooldown
 	_play_attack_cue(global_position.direction_to(current_target.global_position))

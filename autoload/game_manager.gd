@@ -50,3 +50,22 @@ func reset_champion() -> void:
 
 func try_learn_champion_skill(skill_id: StringName) -> bool:
 	return champion.try_learn(skill_id, try_spend_gold)
+
+signal monster_unlocked(data: MonsterData)
+var _unlocked_monsters: Dictionary[StringName, MonsterData] = {}
+
+func reset_monster_unlocks() -> void:
+	_unlocked_monsters.clear()
+
+func get_unlocked_monster_ids() -> Array[StringName]:
+	return _unlocked_monsters.keys()
+
+func record_monster_defeat(unit: Unit) -> bool:
+	if unit.team != Unit.Team.ENEMY or not unit.is_dead or unit.monster == null or unit.monster.id == &"":
+		return false
+	var id: StringName = unit.monster.id
+	if _unlocked_monsters.has(id):
+		return false
+	_unlocked_monsters[id] = unit.monster
+	monster_unlocked.emit(unit.monster)
+	return true

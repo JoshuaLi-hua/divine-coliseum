@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const UNLOCK_NOTICE = preload("res://scenes/ui/monster_unlock_notice.gd")
+var _unlock_notice: Control
 const REWARD_OVERLAY = preload("res://scenes/ui/reward_overlay.gd")
 var _reward: Control
 const SHOP_OVERLAY = preload("res://scenes/ui/shop_overlay.gd")
@@ -27,6 +29,7 @@ func _ready() -> void:
 	GameManager.gold_changed.connect(_update_gold)
 	GameManager.reset_gold()
 	GameManager.reset_champion()
+	GameManager.reset_monster_unlocks()
 	GameManager.champion.changed.connect(_refresh_shop)
 	_reward = REWARD_OVERLAY.new()
 	$Screen.add_child(_reward)
@@ -43,6 +46,9 @@ func _ready() -> void:
 	_shop.skill_requested.connect(_learn_skill)
 	_shop.leave_requested.connect(_battle.leave_shop)
 	deck.initialize([KNIGHT, MILITIA, MILITIA, SWORDSMAN, GUARD, ARCHER, ARCHER], GameManager.champion)
+	_unlock_notice = UNLOCK_NOTICE.new()
+	$Screen.add_child(_unlock_notice)
+	GameManager.monster_unlocked.connect(_unlock_notice.enqueue)
 	_rebuild_hand()
 	_battle.changed.connect(_update_battle)
 

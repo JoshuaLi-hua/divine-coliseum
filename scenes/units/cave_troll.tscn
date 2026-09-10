@@ -1,0 +1,76 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1"]
+[ext_resource type="Resource" path="res://scenes/monsters/cave_troll.tres" id="2"]
+[node name="CaveTroll" instance=ExtResource("1")]
+team = 1
+monster = ExtResource("2")
+unit_name = "Cave Troll"
+engagement_body_radius = 20.0
+max_health = 360
+move_speed = 62.0
+attack_damage = 28
+attack_range = 58.0
+attack_cooldown = 1.8
+
+[node name="HealthBar" parent="." index="2"]
+position = Vector2(-20, -112)
+
+[node name="Feet" type="Polygon2D" parent="Visual" index="0"]
+color = Color(0.1, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-21, -27, 19, -27, 24, -5, 29, 0, 3, 0, 0, -16, -5, 0, -31, 0, -29, -6)
+
+[node name="Bulk" type="Polygon2D" parent="Visual" index="1"]
+color = Color(0.1, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-30, -67, -17, -79, 18, -79, 32, -65, 34, -36, 24, -14, -25, -14, -35, -37)
+
+[node name="Torso" type="Polygon2D" parent="Visual" index="2"]
+color = Color(0.45, 0.45, 0.45, 1)
+polygon = PackedVector2Array(-23, -63, -12, -73, 13, -73, 25, -61, 24, -34, 15, -20, -16, -20, -26, -37)
+
+[node name="Belly" type="Polygon2D" parent="Visual" index="3"]
+color = Color(0.62, 0.62, 0.62, 1)
+polygon = PackedVector2Array(-15, -45, 13, -44, 19, -29, 9, -20, -11, -21, -20, -32)
+
+[node name="ArmLeft" type="Polygon2D" parent="Visual" index="4"]
+color = Color(0.28, 0.28, 0.28, 1)
+polygon = PackedVector2Array(-25, -69, -39, -61, -44, -39, -41, -17, -27, -16, -22, -31, -26, -42)
+
+[node name="ArmRight" type="Polygon2D" parent="Visual" index="5"]
+color = Color(0.35, 0.35, 0.35, 1)
+polygon = PackedVector2Array(22, -69, 37, -60, 44, -43, 38, -22, 25, -22, 27, -43)
+
+[node name="Knuckles" type="Polygon2D" parent="Visual" index="6"]
+color = Color(0.6, 0.6, 0.6, 1)
+polygon = PackedVector2Array(-42, -29, -29, -28, -26, -18, -31, -13, -42, -17)
+
+[node name="Head" type="Polygon2D" parent="Visual" index="7"]
+color = Color(0.12, 0.12, 0.12, 1)
+polygon = PackedVector2Array(-16, -83, -8, -95, 11, -94, 20, -82, 17, -66, 6, -58, -11, -63, -21, -73)
+
+[node name="Face" type="Polygon2D" parent="Visual" index="8"]
+color = Color(0.65, 0.65, 0.65, 1)
+polygon = PackedVector2Array(-12, -82, -5, -90, 9, -89, 15, -79, 11, -69, 0, -64, -12, -71)
+
+[node name="Brow" type="Polygon2D" parent="Visual" index="9"]
+color = Color(0.15, 0.15, 0.15, 1)
+polygon = PackedVector2Array(-15, -81, 12, -80, 11, -75, -15, -76)
+
+[node name="Nose" type="Polygon2D" parent="Visual" index="10"]
+color = Color(0.4, 0.4, 0.4, 1)
+polygon = PackedVector2Array(-8, -77, 0, -75, -3, -68, -12, -70)
+
+[node name="ClubShaft" type="Polygon2D" parent="Visual" index="11"]
+color = Color(0.2, 0.2, 0.2, 1)
+polygon = PackedVector2Array(33, -68, 40, -68, 45, -9, 36, -9)
+
+[node name="StoneClub" type="Polygon2D" parent="Visual" index="12"]
+color = Color(0.08, 0.08, 0.08, 1)
+polygon = PackedVector2Array(29, -98, 48, -101, 57, -88, 55, -63, 40, -57, 27, -70)
+
+[node name="StoneFace" type="Polygon2D" parent="Visual" index="13"]
+color = Color(0.7, 0.7, 0.7, 1)
+polygon = PackedVector2Array(32, -94, 46, -97, 52, -86, 50, -67, 40, -62, 31, -73)
+
+[node name="StoneCrack" type="Polygon2D" parent="Visual" index="14"]
+color = Color(0.3, 0.3, 0.3, 1)
+polygon = PackedVector2Array(42, -94, 40, -80, 46, -74, 43, -64, 48, -73, 43, -81, 45, -93)

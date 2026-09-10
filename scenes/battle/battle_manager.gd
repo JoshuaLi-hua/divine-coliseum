@@ -6,11 +6,15 @@ const MILITIA: PackedScene = preload("res://scenes/units/arena_militia.tscn")
 const SWORDSMAN: PackedScene = preload("res://scenes/units/arena_swordsman.tscn")
 const GUARD: PackedScene = preload("res://scenes/units/shield_guard.tscn")
 const ARCHER: PackedScene = preload("res://scenes/units/arena_archer.tscn")
+const ORC: PackedScene = preload("res://scenes/units/wasteland_orc.tscn")
+const TROLL: PackedScene = preload("res://scenes/units/cave_troll.tscn")
+const SPIDER: PackedScene = preload("res://scenes/units/abyssal_giant_spider.tscn")
+const MONSTER_POSITIONS: Array[Vector2] = [Vector2(420, -90), Vector2(420, 90), Vector2(535, 0), Vector2(480, -220), Vector2(480, 220)]
 # Slots 0–2 are frontline; slots 3–4 use the farther-right spawn points.
 const BATTLES: Array = [
 	[MILITIA, MILITIA, SWORDSMAN],
 	[GUARD, SWORDSMAN, SWORDSMAN, ARCHER],
-	[GUARD, SWORDSMAN, SWORDSMAN, ARCHER, ARCHER],
+	[ORC, ORC, TROLL, SPIDER, SPIDER],
 ]
 const SPAWN_POSITIONS: Array[Vector2] = [Vector2(420, -180), Vector2(420, 0), Vector2(420, 180), Vector2(540, -90), Vector2(540, 90)]
 var current_battle: int = 0
@@ -37,7 +41,7 @@ func _start_next_battle() -> void:
 		var enemy_scene: PackedScene = BATTLES[current_battle - 1][index]
 		var enemy: Unit = enemy_scene.instantiate()
 		enemy.team = Unit.Team.ENEMY
-		enemy.position = SPAWN_POSITIONS[index]
+		enemy.position = MONSTER_POSITIONS[index] if current_battle == 3 else SPAWN_POSITIONS[index]
 		enemy.died.connect(_on_enemy_died)
 		active_enemies.append(enemy)
 		_arena.add_child(enemy)
@@ -46,6 +50,7 @@ func _start_next_battle() -> void:
 func _on_enemy_died(enemy: Unit) -> void:
 	if not active_enemies.has(enemy):
 		return
+	GameManager.record_monster_defeat(enemy)
 	active_enemies.erase(enemy)
 	if active_enemies.is_empty():
 		if current_battle == BATTLES.size():
