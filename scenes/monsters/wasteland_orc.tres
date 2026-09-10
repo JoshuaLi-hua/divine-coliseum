@@ -4,3 +4,4 @@
 script = ExtResource("1")
 id = &"wasteland_orc"
 display_name = "Wasteland Orc"
+role = "Melee Bruiser"

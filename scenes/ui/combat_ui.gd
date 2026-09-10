@@ -1,5 +1,8 @@
 extends CanvasLayer
 
+const BESTIARY_OVERLAY = preload("res://scenes/ui/bestiary_overlay.gd")
+var _bestiary: Control
+
 const UNLOCK_NOTICE = preload("res://scenes/ui/monster_unlock_notice.gd")
 var _unlock_notice: Control
 const REWARD_OVERLAY = preload("res://scenes/ui/reward_overlay.gd")
@@ -49,6 +52,10 @@ func _ready() -> void:
 	_unlock_notice = UNLOCK_NOTICE.new()
 	$Screen.add_child(_unlock_notice)
 	GameManager.monster_unlocked.connect(_unlock_notice.enqueue)
+	_bestiary = BESTIARY_OVERLAY.new()
+	$Screen.add_child(_bestiary)
+	_bestiary.closed.connect(_on_bestiary_closed)
+	$Screen/Bestiary.pressed.connect(_open_bestiary)
 	_rebuild_hand()
 	_battle.changed.connect(_update_battle)
 	$Screen/NewRun.pressed.connect(_new_run)
@@ -57,7 +64,7 @@ func _update_power(value: float) -> void:
 	_power_label.text = "Divine Power: %d / 10" % floori(value)
 
 func _on_dragging_changed(active: bool) -> void:
-	_region.visible = active
+	_region.visible = active and not _cards_locked()
 
 func _rebuild_hand() -> void:
 	for child: Node in _hand.get_children():
@@ -71,13 +78,13 @@ func _rebuild_hand() -> void:
 		card.upgrade_level = deck.get_upgrade_level(card.card_id)
 		card.position = Vector2(float(slot) * 256.0 - (float(deck.hand.size()) * 256.0 - 16.0) / 2.0, 0)
 		_hand.add_child(card)
-		card.set_interaction_locked(_battle.between_battles or _battle.victory)
+		card.set_interaction_locked(_cards_locked())
 		card.dragging_changed.connect(_on_dragging_changed)
 		card.dropped.connect(_on_card_dropped)
 	$Screen/Piles.text = "Draw: %d\nDiscard: %d" % [deck.draw_pile.size(), deck.discard_pile.size()]
 
 func _on_card_dropped(card: SummonCard, viewport_position: Vector2) -> void:
-	if _battle.between_battles or _battle.victory or card.consumed or not deck.hand.has(card.card_id):
+	if _cards_locked() or card.consumed or not deck.hand.has(card.card_id):
 		return
 	var data: CardData = deck.definitions[card.card_id]
 	if _region.try_summon(data.unit_scene, viewport_position, data.divine_power_cost, data, deck.get_upgrade_level(card.card_id), deck.champion, card.card_id) == null:
@@ -104,10 +111,11 @@ func _update_battle() -> void:
 		_shop.configure_offers(_shop_cards)
 	_shop.visible = _battle.shop_open
 	$Screen/NewRun.visible = _battle.victory
+	$Screen/Bestiary.disabled = not _can_open_bestiary()
 	_refresh_shop()
 	for card: SummonCard in _hand.get_children():
-		card.set_interaction_locked(_battle.between_battles or _battle.victory)
-	if _battle.between_battles or _battle.victory:
+		card.set_interaction_locked(_cards_locked())
+	if _cards_locked():
 		_region.hide()
 
 func _update_gold(value: int) -> void:
@@ -187,7 +195,7 @@ func _learn_skill(skill_id: StringName) -> void:
 
 
 func _new_run() -> void:
-	if not _battle.victory or _restarting:
+	if not _battle.victory or _restarting or _bestiary.visible or get_tree().paused:
 		return
 	_restarting = true
 	$Screen/NewRun.disabled = true
@@ -195,9 +203,29 @@ func _new_run() -> void:
 
 func _restart_scene() -> void:
 	# Scene replacement frees old units, deck, overlays and their signal connections.
-	# The GameManager autoload (and its session unlock registry) survives.
+	# The GameManager autoload (and its permanent unlock registry) survives.
 	var result: Error = get_tree().reload_current_scene()
 	if result != OK:
 		_restarting = false
 		$Screen/NewRun.disabled = false
 		push_error("Could not start a new run: %s" % error_string(result))
+
+
+func _cards_locked() -> bool:
+	return get_tree().paused or _battle.between_battles or _battle.victory or (is_instance_valid(_bestiary) and _bestiary.visible)
+
+func _can_open_bestiary() -> bool:
+	return not _restarting and _battle.current_battle > 0 and not _battle.between_battles and not _battle.shop_open and not _reward.visible and not _shop.visible and not _shop.selecting
+
+func _open_bestiary() -> void:
+	if not _can_open_bestiary() or _bestiary.visible:
+		return
+	_bestiary.open()
+	for card: SummonCard in _hand.get_children():
+		card.set_interaction_locked(true)
+	_region.hide()
+
+func _on_bestiary_closed() -> void:
+	for card: SummonCard in _hand.get_children():
+		card.set_interaction_locked(_cards_locked())
+	$Screen/Bestiary.disabled = not _can_open_bestiary()

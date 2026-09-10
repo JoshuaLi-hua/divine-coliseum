@@ -114,3 +114,17 @@ theme_override_styles/hover = SubResource("Style_new_run_hover")
 theme_override_styles/pressed = SubResource("Style_new_run_hover")
 theme_override_styles/focus = SubResource("Style_new_run_hover")
 text = "NEW RUN"
+
+
+[node name="Bestiary" type="Button" parent="CombatUI/Screen"]
+process_mode = 3
+offset_left = 24.0
+offset_top = 100.0
+offset_right = 224.0
+offset_bottom = 152.0
+disabled = true
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("Style_new_run")
+theme_override_styles/hover = SubResource("Style_new_run_hover")
+theme_override_styles/pressed = SubResource("Style_new_run_hover")
+text = "BESTIARY"

@@ -4,6 +4,7 @@ extends Resource
 @export var display_name: String = "Unit"
 @export var divine_power_cost: int = 0
 @export var unit_scene: PackedScene
+@export var monster: MonsterData
 
 # Immutable per-type profiles, indexed by star level minus one.
 @export var health_by_level: Array[int] = []

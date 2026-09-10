@@ -1,5 +1,5 @@
 extends Node
-## Session unlocks outlive scene replacement; currencies and Champion are run state.
+## Permanent monster unlocks are loaded once; currencies and Champion are run state.
 signal divine_power_changed(value: float)
 signal gold_changed(value: int)
 var gold: int = 0
@@ -54,6 +54,11 @@ func try_learn_champion_skill(skill_id: StringName) -> bool:
 signal monster_unlocked(data: MonsterData)
 var _unlocked_monsters: Dictionary[StringName, MonsterData] = {}
 
+func _ready() -> void:
+	for id: StringName in MonsterProgress.load_ids():
+		var card: CardData = CardCatalog.MONSTER_CARDS[id]
+		_unlocked_monsters[id] = card.monster
+
 func get_unlocked_monster_ids() -> Array[StringName]:
 	return _unlocked_monsters.keys()
 
@@ -61,10 +66,12 @@ func record_monster_defeat(unit: Unit) -> bool:
 	if unit.team != Unit.Team.ENEMY or not unit.is_dead or unit.monster == null or unit.monster.id == &"":
 		return false
 	var id: StringName = unit.monster.id
-	if _unlocked_monsters.has(id):
+	if not CardCatalog.MONSTER_CARDS.has(id) or _unlocked_monsters.has(id):
 		return false
-	_unlocked_monsters[id] = unit.monster
-	monster_unlocked.emit(unit.monster)
+	var card: CardData = CardCatalog.MONSTER_CARDS[id]
+	_unlocked_monsters[id] = card.monster
+	MonsterProgress.save_ids(get_unlocked_monster_ids())
+	monster_unlocked.emit(card.monster)
 	return true
 
 

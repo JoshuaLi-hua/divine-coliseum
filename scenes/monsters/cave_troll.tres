@@ -4,3 +4,4 @@
 script = ExtResource("1")
 id = &"cave_troll"
 display_name = "Cave Troll"
+role = "Heavy Tank"

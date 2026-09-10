@@ -1,8 +1,10 @@
-[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3]
+[gd_resource type="Resource" script_class="CardData" load_steps=4 format=3]
 [ext_resource type="Script" path="res://scenes/cards/card_data.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/units/abyssal_giant_spider.tscn" id="2"]
+[ext_resource type="Resource" path="res://scenes/monsters/abyssal_giant_spider.tres" id="3"]
 [resource]
 script = ExtResource("1")
+monster = ExtResource("3")
 display_name = "Abyssal Giant Spider"
 divine_power_cost = 2
 unit_scene = ExtResource("2")
