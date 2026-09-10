@@ -50,24 +50,122 @@ func _ready() -> void:
 	add_to_group("units")
 
 
+# Target-owned reservations store instance IDs, never strong references.
+const SLOT_COUNT: int = 8
+const SLOT_RADIUS: float = 38.0
+const ALLY_SPACING: float = 29.0
+var engagement_slot: int = -1
+var _slot_target: Unit
+var _slot_owners: Dictionary[int, int] = {}
+var _slot_rotation: float = 0.0
+
+func _release_slot() -> void:
+	if is_instance_valid(_slot_target):
+		_slot_target._slot_owners.erase(engagement_slot)
+	_slot_target = null
+	engagement_slot = -1
+
+func _exit_tree() -> void:
+	_release_slot()
+
+func _reserve_slot(attacker: Unit) -> int:
+	for index: int in _slot_owners.keys():
+		var owner: Unit = instance_from_id(_slot_owners[index]) as Unit
+		if not is_instance_valid(owner) or owner.is_dead or not owner.is_inside_tree() or owner.current_target != self:
+			_slot_owners.erase(index)
+	# A mutually targeting pair must agree on opposite offsets. Independent
+	# nearest slots can otherwise make the pair chase a translating midpoint.
+	if current_target == attacker and engagement_slot >= 0 and engagement_slot < SLOT_COUNT:
+		var opposite: int = posmod(roundi((attacker._slot_rotation + engagement_slot * TAU / SLOT_COUNT + PI - _slot_rotation) * SLOT_COUNT / TAU), SLOT_COUNT)
+		if not _slot_owners.has(opposite):
+			_slot_owners[opposite] = attacker.get_instance_id()
+			return opposite
+	var ring: int = 0
+	while true:
+		var best: int = -1
+		var best_distance: float = INF
+		for index: int in range(ring * SLOT_COUNT, (ring + 1) * SLOT_COUNT):
+			if _slot_owners.has(index):
+				continue
+			var distance: float = attacker.global_position.distance_squared_to(_slot_position(index, attacker.attack_range))
+			if distance < best_distance:
+				best_distance = distance
+				best = index
+		if best >= 0:
+			_slot_owners[best] = attacker.get_instance_id()
+			if current_target == attacker and engagement_slot >= 0:
+				# Match the existing pair's direction without reassigning anyone's ID.
+				# Rotate this target's entire ring once when the mutual pair forms.
+				_slot_rotation = attacker._slot_rotation + (engagement_slot % SLOT_COUNT) * TAU / SLOT_COUNT + PI - (best % SLOT_COUNT) * TAU / SLOT_COUNT
+			return best
+		ring += 1
+	return -1
+
+func _has_inner_vacancy() -> bool:
+	for index: int in range(SLOT_COUNT):
+		if not _slot_owners.has(index):
+			return true
+	return false
+
+func _slot_position(index: int, reach: float) -> Vector2:
+	var ring: int = index / SLOT_COUNT
+	var radius: float = minf(SLOT_RADIUS, maxf(0.0, reach - 4.0)) + ring * ALLY_SPACING
+	return global_position + Vector2.from_angle(_slot_rotation + (index % SLOT_COUNT) * TAU / SLOT_COUNT) * radius
+
+func _ally_separation() -> Vector2:
+	var push: Vector2 = Vector2.ZERO
+	for node: Node in get_tree().get_nodes_in_group("units"):
+		var ally: Unit = node as Unit
+		if ally == self or ally == null or ally.is_dead or ally.team != team:
+			continue
+		var offset: Vector2 = global_position - ally.global_position
+		var distance: float = offset.length()
+		if distance >= ALLY_SPACING:
+			continue
+		if distance < 0.001:
+			# Antisymmetric, deterministic tie break for exact spawn stacking.
+			var angle: float = float((mini(get_instance_id(), ally.get_instance_id()) * 97) % 360)
+			offset = Vector2.from_angle(deg_to_rad(angle)) * (1.0 if get_instance_id() < ally.get_instance_id() else -1.0)
+		else:
+			offset /= distance
+		push += offset * (ALLY_SPACING - distance) * 4.0
+	return push.limit_length(60.0)
+
 func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
 	_attack_time_left = maxf(0.0, _attack_time_left - delta)
 	if not _is_valid_opponent(current_target):
 		current_target = _find_nearest_opponent()
-
+	if _slot_target != current_target or attack_mode != AttackMode.MELEE:
+		_release_slot()
 	_update_facing()
-	velocity = Vector2.ZERO
-	if is_instance_valid(current_target):
-		var offset: Vector2 = current_target.global_position - global_position
-		var distance: float = offset.length()
-		var remaining: float = distance - attack_range
-		if remaining > 0.0 and delta > 0.0:
-			# Cap the last step so this unit cannot overshoot its melee range.
-			velocity = offset.normalized() * minf(move_speed, remaining / delta)
-		elif remaining <= 0.0:
-			_try_attack()
+	var desired: Vector2 = Vector2.ZERO
+	if _is_valid_opponent(current_target):
+		var distance: float = global_position.distance_to(current_target.global_position)
+		if attack_mode == AttackMode.MELEE:
+			if engagement_slot < 0:
+				_slot_target = current_target
+				engagement_slot = current_target._reserve_slot(self)
+			elif engagement_slot >= SLOT_COUNT and current_target._has_inner_vacancy():
+				# Waiting rings advance only after a vacancy, never shuffle occupied slots.
+				_release_slot()
+				_slot_target = current_target
+				engagement_slot = current_target._reserve_slot(self)
+			var destination: Vector2 = current_target._slot_position(engagement_slot, attack_range)
+			var offset: Vector2 = destination - global_position
+			desired = (offset * 6.0).limit_length(move_speed)
+			if offset.length() <= 7.0 and distance <= attack_range:
+				_try_attack()
+		else:
+			var remaining: float = distance - (attack_range - 2.0)
+			if remaining > 0.0:
+				desired = global_position.direction_to(current_target.global_position) * minf(move_speed, remaining * 6.0)
+			if distance <= attack_range:
+				_try_attack()
+	velocity = (desired + _ally_separation()).limit_length(move_speed)
+	if velocity.length() < 0.5:
+		velocity = Vector2.ZERO
 	move_and_slide()
 
 
@@ -125,6 +223,13 @@ func _die() -> void:
 	if is_dead:
 		return
 	is_dead = true
+	_release_slot()
+	for owner_id: int in _slot_owners.values():
+		var owner: Unit = instance_from_id(owner_id) as Unit
+		if is_instance_valid(owner):
+			owner._slot_target = null
+			owner.engagement_slot = -1
+	_slot_owners.clear()
 	velocity = Vector2.ZERO
 	current_target = null
 	set_physics_process(false)
