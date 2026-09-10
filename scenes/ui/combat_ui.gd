@@ -1,5 +1,8 @@
 extends CanvasLayer
 
+const REWARD_OVERLAY = preload("res://scenes/ui/reward_overlay.gd")
+var _reward: Control
+
 const CARD_SCENE: PackedScene = preload("res://scenes/cards/card.tscn")
 const KNIGHT: CardData = preload("res://scenes/cards/ironbound_knight.tres")
 const MILITIA: CardData = preload("res://scenes/cards/arena_militia.tres")
@@ -16,6 +19,12 @@ var deck: CombatDeck = CombatDeck.new()
 func _ready() -> void:
 	GameManager.divine_power_changed.connect(_update_power)
 	GameManager.reset_divine_power()
+	GameManager.gold_changed.connect(_update_gold)
+	GameManager.reset_gold()
+	_reward = REWARD_OVERLAY.new()
+	$Screen.add_child(_reward)
+	_reward.reward_chosen.connect(_choose_reward)
+	_reward.continued.connect(_continue_reward)
 	deck.initialize([KNIGHT, MILITIA, MILITIA, SWORDSMAN, GUARD, ARCHER, ARCHER])
 	_rebuild_hand()
 	_battle.changed.connect(_update_battle)
@@ -36,12 +45,13 @@ func _rebuild_hand() -> void:
 		card.data = deck.definitions[card.card_id]
 		card.position = Vector2(float(slot) * 256.0 - (float(deck.hand.size()) * 256.0 - 16.0) / 2.0, 0)
 		_hand.add_child(card)
+		card.set_interaction_locked(_battle.between_battles)
 		card.dragging_changed.connect(_on_dragging_changed)
 		card.dropped.connect(_on_card_dropped)
 	$Screen/Piles.text = "Draw: %d\nDiscard: %d" % [deck.draw_pile.size(), deck.discard_pile.size()]
 
 func _on_card_dropped(card: SummonCard, viewport_position: Vector2) -> void:
-	if card.consumed or not deck.hand.has(card.card_id):
+	if _battle.between_battles or card.consumed or not deck.hand.has(card.card_id):
 		return
 	var data: CardData = deck.definitions[card.card_id]
 	if _region.try_summon(data.unit_scene, viewport_position, data.divine_power_cost) == null:
@@ -56,3 +66,28 @@ func _on_card_dropped(card: SummonCard, viewport_position: Vector2) -> void:
 func _update_battle() -> void:
 	$Screen/BattleStatus.text = "Battle %d / %d\nEnemies: %d" % [_battle.current_battle, _battle.BATTLES.size(), _battle.active_enemies.size()]
 	$Screen/BattleMessage.text = "VICTORY" if _battle.victory else ("BATTLE CLEARED" if _battle.between_battles else "")
+	if _battle.between_battles:
+		if not _reward.visible:
+			_reward.open()
+	else:
+		_reward.hide()
+	for card: SummonCard in _hand.get_children():
+		card.set_interaction_locked(_battle.between_battles)
+	if _battle.between_battles:
+		_region.hide()
+
+func _update_gold(value: int) -> void:
+	$Screen/Gold.text = "Gold: %d" % value
+
+func _choose_reward(index: int) -> void:
+	if index < 0 or index > 2 or not _battle.claim_reward():
+		return
+	if index == 2:
+		GameManager.add_gold(75)
+	else:
+		deck.add_reward(SWORDSMAN if index == 0 else ARCHER)
+	$Screen/Piles.text = "Draw: %d\nDiscard: %d" % [deck.draw_pile.size(),deck.discard_pile.size()]
+	_reward.mark_selected(index)
+
+func _continue_reward() -> void:
+	_battle.continue_after_reward()

@@ -1,6 +1,8 @@
 extends Node
 ## Minimal run-level summon resource.
 signal divine_power_changed(value: float)
+signal gold_changed(value: int)
+var gold: int = 0
 
 const MAX_DIVINE_POWER: float = 10.0
 const STARTING_DIVINE_POWER: float = 5.0
@@ -23,3 +25,12 @@ func try_spend(cost: float) -> bool:
 	divine_power -= cost
 	divine_power_changed.emit(divine_power)
 	return true
+
+func reset_gold() -> void:
+	gold = 0
+	gold_changed.emit(gold)
+
+func add_gold(amount: int) -> void:
+	if amount > 0:
+		gold += amount
+		gold_changed.emit(gold)

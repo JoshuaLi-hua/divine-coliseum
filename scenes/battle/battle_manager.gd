@@ -17,15 +17,17 @@ var current_battle: int = 0
 var active_enemies: Array[Unit] = []
 var between_battles: bool = false
 var victory: bool = false
+var reward_selected: bool = false
 @onready var _arena: Node2D = get_parent().get_node("Arena")
 
 func _ready() -> void:
 	_start_next_battle.call_deferred()
 
 func _start_next_battle() -> void:
-	if victory or not active_enemies.is_empty() or current_battle >= BATTLES.size():
+	if (current_battle > 0 and not reward_selected) or victory or not active_enemies.is_empty() or current_battle >= BATTLES.size():
 		return
 	between_battles = false
+	reward_selected = false
 	current_battle += 1
 	for index: int in range(BATTLES[current_battle - 1].size()):
 		var enemy_scene: PackedScene = BATTLES[current_battle - 1][index]
@@ -46,5 +48,15 @@ func _on_enemy_died(enemy: Unit) -> void:
 			victory = true
 		else:
 			between_battles = true
-			get_tree().create_timer(2.0, false).timeout.connect(_start_next_battle)
+			reward_selected = false
 	changed.emit()
+
+func claim_reward() -> bool:
+	if not between_battles or reward_selected or victory:
+		return false
+	reward_selected = true
+	return true
+
+func continue_after_reward() -> void:
+	if between_battles and reward_selected and not victory:
+		_start_next_battle()

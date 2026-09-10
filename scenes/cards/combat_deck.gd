@@ -33,3 +33,10 @@ func _draw_to_hand() -> void:
 			discard_pile.clear()
 			draw_pile.shuffle()
 		hand.append(draw_pile.pop_back())
+
+func add_reward(data: CardData) -> int:
+	# Definitions are append-only: the next index is always a fresh logical ID.
+	var card_id: int = definitions.size()
+	definitions.append(data)
+	discard_pile.append(card_id)
+	return card_id
