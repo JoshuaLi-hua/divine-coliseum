@@ -26,7 +26,7 @@ func _ready() -> void:
 	box.add_child(row)
 	for index: int in range(3):
 		var button := Button.new()
-		button.text = ["Arena Swordsman Card","Arena Archer Card","+75 Gold"][index]
+		button.text = "+75 Gold" if index == 2 else ""
 		button.custom_minimum_size = Vector2(296,100)
 		_style(button)
 		button.pressed.connect(func() -> void: reward_chosen.emit(index))
@@ -51,7 +51,10 @@ func _style(button: Button) -> void:
 		style.border_color = Color(0.7,0.7,0.7)
 		button.add_theme_stylebox_override(state,style)
 
-func open() -> void:
+func open(cards: Array[CardData]) -> void:
+	assert(cards.size() == 2)
+	for index: int in range(2):
+		choices[index].text = "%s\n★ | Divine Power: %d" % [cards[index].display_name, cards[index].divine_power_cost]
 	for button: Button in choices:
 		button.add_theme_color_override("font_disabled_color",Color(0.6,0.6,0.6))
 		button.disabled = false

@@ -9,6 +9,7 @@ signal training_requested
 signal skill_requested(id: StringName)
 signal leave_requested
 var offers: Array[Button] = []
+var _offer_prices: Array[int] = []
 var gold_label: Label
 var remove_button: Button
 var upgrade_button: Button
@@ -45,7 +46,7 @@ func _ready() -> void:
 	shop = VBoxContainer.new()
 	panel.add_child(shop)
 	for index: int in range(3):
-		var button := _button(["Arena Swordsman\nCost: 60 Gold", "Shield Guard\nCost: 90 Gold", "Arena Archer\nCost: 80 Gold"][index], shop)
+		var button := _button("", shop)
 		button.pressed.connect(func() -> void: purchase_requested.emit(index))
 		offers.append(button)
 	remove_button = _button("Remove a Card — 50 Gold", shop)
@@ -88,10 +89,18 @@ func _button(caption: String, parent: Node) -> Button:
 	parent.add_child(button)
 	return button
 
+func configure_offers(cards: Array[CardData]) -> void:
+	assert(cards.size() == offers.size())
+	_offer_prices.clear()
+	for index: int in range(cards.size()):
+		var price: int = CardCatalog.shop_price(cards[index])
+		_offer_prices.append(price)
+		offers[index].text = "%s ★\nCost: %d Gold" % [cards[index].display_name, price]
+
 func refresh(gold: int, purchased: Array[bool], deck_size: int, can_upgrade: bool = false) -> void:
 	gold_label.text = "Gold: %d" % gold
 	for index: int in range(3):
-		offers[index].disabled = purchased[index] or gold < [60, 90, 80][index]
+		offers[index].disabled = index >= _offer_prices.size() or purchased[index] or gold < _offer_prices[index]
 	remove_button.disabled = gold < 50 or deck_size <= 3
 	upgrade_button.disabled = gold < 75 or not can_upgrade
 

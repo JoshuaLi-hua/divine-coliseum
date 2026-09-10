@@ -1,5 +1,5 @@
 extends Node
-## Minimal run-level summon resource.
+## Session unlocks outlive scene replacement; currencies and Champion are run state.
 signal divine_power_changed(value: float)
 signal gold_changed(value: int)
 var gold: int = 0
@@ -54,9 +54,6 @@ func try_learn_champion_skill(skill_id: StringName) -> bool:
 signal monster_unlocked(data: MonsterData)
 var _unlocked_monsters: Dictionary[StringName, MonsterData] = {}
 
-func reset_monster_unlocks() -> void:
-	_unlocked_monsters.clear()
-
 func get_unlocked_monster_ids() -> Array[StringName]:
 	return _unlocked_monsters.keys()
 
@@ -69,3 +66,12 @@ func record_monster_defeat(unit: Unit) -> bool:
 	_unlocked_monsters[id] = unit.monster
 	monster_unlocked.emit(unit.monster)
 	return true
+
+
+func reset_run_state() -> void:
+	reset_divine_power()
+	reset_gold()
+	reset_champion()
+
+func get_eligible_cards() -> Array[CardData]:
+	return CardCatalog.eligible_cards(get_unlocked_monster_ids())
