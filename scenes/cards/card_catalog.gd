@@ -8,14 +8,16 @@ const HEALER: CardData = preload("res://scenes/cards/ashen_healer.tres")
 const ORC: CardData = preload("res://scenes/cards/wasteland_orc.tres")
 const TROLL: CardData = preload("res://scenes/cards/cave_troll.tres")
 const SPIDER: CardData = preload("res://scenes/cards/abyssal_giant_spider.tres")
+const BONECALLER: CardData = preload("res://scenes/cards/bonecaller.tres")
 const MONSTER_CARDS: Dictionary = {
 	&"wasteland_orc": ORC,
 	&"cave_troll": TROLL,
 	&"abyssal_giant_spider": SPIDER,
+	&"bonecaller": BONECALLER,
 }
 const SHOP_PRICES: Dictionary = {
 	SWORDSMAN: 60, GUARD: 90, ARCHER: 80, HEALER: 85,
-	ORC: 70, TROLL: 140, SPIDER: 65,
+	ORC: 70, TROLL: 140, SPIDER: 65, BONECALLER: 110,
 }
 
 static func eligible_cards(unlocked_ids: Array[StringName]) -> Array[CardData]:

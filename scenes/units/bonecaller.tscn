@@ -1,11 +1,13 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1_unit"]
 [ext_resource type="PackedScene" path="res://scenes/projectiles/projectile.tscn" id="2_projectile"]
 [ext_resource type="Script" path="res://scenes/units/combat_summoner.gd" id="3_summoner"]
 [ext_resource type="PackedScene" path="res://scenes/units/bone_minion.tscn" id="4_minion"]
+[ext_resource type="Resource" path="res://scenes/monsters/bonecaller.tres" id="5_monster"]
 
 [node name="Bonecaller" instance=ExtResource("1_unit")]
+monster = ExtResource("5_monster")
 team = 1
 unit_name = "Bonecaller"
 max_health = 95

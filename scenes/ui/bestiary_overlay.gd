@@ -19,8 +19,8 @@ func _ready() -> void:
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	panel.offset_left = -620
 	panel.offset_right = 620
-	panel.offset_top = -240
-	panel.offset_bottom = 240
+	panel.offset_top = -410
+	panel.offset_bottom = 410
 	panel.add_theme_stylebox_override("panel", _style(Color(0.06, 0.06, 0.06)))
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 24)
@@ -30,14 +30,16 @@ func _ready() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 34)
 	column.add_child(title)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 18)
-	column.add_child(row)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 18)
+	grid.add_theme_constant_override("v_separation", 18)
+	column.add_child(grid)
 	for id: StringName in CardCatalog.MONSTER_CARDS:
 		var entry_panel := PanelContainer.new()
 		entry_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		entry_panel.add_theme_stylebox_override("panel", _style(Color(0.1, 0.1, 0.1)))
-		row.add_child(entry_panel)
+		grid.add_child(entry_panel)
 		var entry := VBoxContainer.new()
 		entry.set_meta("monster_id", id)
 		entry.custom_minimum_size = Vector2(340, 250)
