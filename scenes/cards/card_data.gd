@@ -8,6 +8,7 @@ extends Resource
 
 # Immutable per-type profiles, indexed by star level minus one.
 @export var health_by_level: Array[int] = []
+@export var healing_by_level: Array[int] = []
 @export var damage_by_level: Array[int] = []
 @export var block_by_level: Array[float] = []
 
@@ -18,6 +19,8 @@ func apply_summon_stats(unit: Unit, level: int) -> void:
 		unit.max_health = health_by_level[index]
 	if index < damage_by_level.size():
 		unit.attack_damage = damage_by_level[index]
+	if index < healing_by_level.size():
+		unit.heal_amount = healing_by_level[index]
 	if index < block_by_level.size():
 		unit.frontal_damage_reduction = block_by_level[index]
 	unit.current_health = unit.max_health

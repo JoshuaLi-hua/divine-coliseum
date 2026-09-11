@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1"]
+[ext_resource type="Script" path="res://scenes/units/ashen_healer.gd" id="2"]
+[node name="AshenHealer" instance=ExtResource("1")]
+script = ExtResource("2")
+unit_name = "Ashen Healer"
+max_health = 55
+move_speed = 90.0
+heal_amount = 12
+
+[node name="Robe" type="Polygon2D" parent="Visual" index="0"]
+polygon = PackedVector2Array(-8, -39, 8, -39, 15, -3, -15, -3)
+color = Color(0.65, 0.65, 0.65, 1)
+[node name="Trim" type="Polygon2D" parent="Visual" index="1"]
+polygon = PackedVector2Array(-3, -38, 3, -38, 5, -3, -5, -3)
+color = Color(0.94, 0.94, 0.94, 1)
+[node name="Hood" type="Polygon2D" parent="Visual" index="2"]
+polygon = PackedVector2Array(-11, -43, -7, -57, 6, -57, 11, -43, 6, -36, -6, -36)
+color = Color(0.85, 0.85, 0.85, 1)
+[node name="Face" type="Polygon2D" parent="Visual" index="3"]
+polygon = PackedVector2Array(-6, -49, 6, -49, 5, -40, -5, -40)
+color = Color(0.18, 0.18, 0.18, 1)
+[node name="Staff" type="Polygon2D" parent="Visual" index="4"]
+polygon = PackedVector2Array(17, -57, 20, -57, 20, 0, 17, 0)
+color = Color(0.8, 0.8, 0.8, 1)
+[node name="StaffCross" type="Polygon2D" parent="Visual" index="5"]
+polygon = PackedVector2Array(12, -51, 25, -51, 25, -47, 12, -47)
+color = Color(0.94, 0.94, 0.94, 1)

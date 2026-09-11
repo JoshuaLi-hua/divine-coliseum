@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CardData" load_steps=3 format=3]
+[ext_resource type="Script" path="res://scenes/cards/card_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/units/ashen_healer.tscn" id="2"]
+[resource]
+script = ExtResource("1")
+display_name = "Ashen Healer"
+divine_power_cost = 3
+unit_scene = ExtResource("2")
+health_by_level = Array[int]([55, 70, 90])
+healing_by_level = Array[int]([12, 16, 21])

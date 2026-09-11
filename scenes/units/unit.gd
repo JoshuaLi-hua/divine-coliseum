@@ -25,6 +25,7 @@ var _visual_rest_scale: Vector2
 @export var max_health: int = 1
 @export var move_speed: float = 0.0
 @export var attack_damage: int = 0
+@export var heal_amount: int = 0
 @export var attack_range: float = 0.0
 @export var attack_cooldown: float = 1.0
 
@@ -243,6 +244,29 @@ func _try_attack() -> void:
 		current_target.take_damage(attack_damage, current_target.global_position.direction_to(global_position))
 	if not _is_valid_opponent(current_target):
 		current_target = null
+
+
+func heal(amount: int) -> int:
+	if is_dead or is_queued_for_deletion() or amount <= 0:
+		return 0
+	var restored: int = mini(amount, maxi(0, max_health - current_health))
+	if restored == 0:
+		return 0
+	current_health += restored
+	_update_health_bar()
+	var feedback: Label = Label.new()
+	feedback.text = "+%d HP" % restored
+	feedback.position = Vector2(-24, -94)
+	feedback.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	feedback.add_theme_font_size_override("font_size", 14)
+	feedback.add_theme_color_override("font_outline_color", Color.BLACK)
+	feedback.add_theme_constant_override("outline_size", 3)
+	add_child(feedback)
+	var tween: Tween = create_tween().set_parallel(true)
+	tween.tween_property(feedback, "position:y", -112.0, 0.65)
+	tween.tween_property(feedback, "modulate:a", 0.0, 0.65)
+	tween.chain().tween_callback(feedback.queue_free)
+	return restored
 
 
 func take_damage(amount: int, direction_to_source: Vector2 = Vector2.ZERO) -> void:
