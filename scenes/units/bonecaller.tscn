@@ -10,6 +10,8 @@
 monster = ExtResource("5_monster")
 team = 1
 unit_name = "Bonecaller"
+action_style = "bonecaller"
+action_parts = PackedStringArray("Sleeve", "Hand", "Staff", "StaffCrown")
 max_health = 95
 move_speed = 70.0
 attack_damage = 6

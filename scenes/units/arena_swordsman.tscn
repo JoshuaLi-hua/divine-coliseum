@@ -5,6 +5,8 @@
 [node name="ArenaSwordsman" instance=ExtResource("1_unit")]
 team = 1
 unit_name = "Arena Swordsman"
+action_style = "swordsman"
+action_parts = PackedStringArray("SwordOutline", "Blade", "Hand")
 max_health = 90
 move_speed = 110.0
 attack_damage = 14

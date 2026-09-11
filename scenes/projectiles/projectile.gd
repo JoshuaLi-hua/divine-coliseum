@@ -13,7 +13,7 @@ func _physics_process(delta: float) -> void:
 	if _resolved:
 		return
 	lifetime -= delta
-	if lifetime <= 0.0 or not is_instance_valid(target) or not target.is_inside_tree() or target.is_dead or target.is_queued_for_deletion() or target.team == source_team:
+	if lifetime <= 0.0 or not is_instance_valid(target) or not target.is_inside_tree() or not target.is_targetable() or target.team == source_team:
 		_finish()
 		return
 	var destination: Vector2 = target.global_position + TARGET_OFFSET

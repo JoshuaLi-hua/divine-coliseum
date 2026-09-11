@@ -5,6 +5,9 @@
 [node name="BoneMinion" instance=ExtResource("1_unit")]
 team = 1
 unit_name = "Bone Minion"
+action_style = "minion"
+action_parts = PackedStringArray("Sword", "Blade", "Arm")
+emerge_on_spawn = true
 max_health = 45
 move_speed = 110.0
 attack_damage = 7

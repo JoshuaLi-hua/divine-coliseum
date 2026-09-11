@@ -5,6 +5,8 @@
 [node name="IronboundKnight" instance=ExtResource("1_unit")]
 team = 0
 unit_name = "Ironbound Knight"
+action_style = "knight"
+action_parts = PackedStringArray("SwordOutline", "SwordBlade", "SwordGuard", "SwordGrip", "Gauntlet")
 max_health = 180
 move_speed = 120.0
 attack_damage = 17

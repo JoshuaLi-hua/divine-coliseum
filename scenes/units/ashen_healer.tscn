@@ -4,6 +4,8 @@
 [node name="AshenHealer" instance=ExtResource("1")]
 script = ExtResource("2")
 unit_name = "Ashen Healer"
+action_style = "healer"
+action_parts = PackedStringArray("Staff", "StaffCross")
 max_health = 55
 move_speed = 90.0
 heal_amount = 12

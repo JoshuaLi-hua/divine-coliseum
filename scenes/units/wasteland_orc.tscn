@@ -5,6 +5,8 @@
 team = 1
 monster = ExtResource("2")
 unit_name = "Wasteland Orc"
+action_style = "orc"
+action_parts = PackedStringArray("Grip", "CleaverOutline", "Cleaver", "Edge", "Fist")
 max_health = 125
 move_speed = 115.0
 attack_damage = 16

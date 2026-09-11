@@ -5,6 +5,8 @@
 team = 1
 monster = ExtResource("2")
 unit_name = "Cave Troll"
+action_style = "troll"
+action_parts = PackedStringArray("ArmRight", "ClubShaft", "StoneClub", "StoneFace", "StoneCrack")
 engagement_body_radius = 20.0
 max_health = 360
 move_speed = 62.0

@@ -7,6 +7,13 @@ signal died(unit: Unit)
 enum Team { PLAYER, ENEMY }
 enum AttackMode { MELEE, PROJECTILE }
 
+@export_enum("knight", "militia", "swordsman", "guard", "archer", "healer", "orc", "troll", "spider", "bonecaller", "minion") var action_style: String = "militia"
+@export var action_parts: PackedStringArray = []
+@export var emerge_on_spawn: bool = false
+var is_emerging: bool = false
+var actions: UnitAction
+var _attack_target: WeakRef
+
 @export var attack_mode: AttackMode = AttackMode.MELEE
 @export var projectile_scene: PackedScene
 @export var projectile_speed: float = 650.0
@@ -35,8 +42,6 @@ var is_dead: bool = false
 var _attack_time_left: float = 0.0
 var _hit_tween: Tween
 var _visual_rest_modulate: Color
-var _attack_tween: Tween
-var _visual_rest_position: Vector2
 
 @onready var _health_bar: Node2D = $HealthBar
 @onready var _health_fill: ColorRect = $HealthBar/Fill
@@ -47,10 +52,17 @@ func _ready() -> void:
 	_visual_rest_scale = _visual.scale
 	facing_direction = Vector2.RIGHT if team == Team.PLAYER else Vector2.LEFT
 	_visual_rest_modulate = _visual.modulate
-	_visual_rest_position = _visual.position
 	current_health = max_health
 	_update_health_bar()
 	add_to_group("units")
+	actions = UnitAction.new()
+	actions.name = "Actions"
+	add_child(actions)
+	actions.setup(self, _visual, action_parts)
+	if emerge_on_spawn:
+		is_emerging = true
+		_health_bar.hide()
+		actions.begin_emergence(0.85, _finish_emergence)
 
 
 # Target-owned reservations store instance IDs, never strong references.
@@ -128,7 +140,7 @@ func _ally_separation() -> Vector2:
 	var push: Vector2 = Vector2.ZERO
 	for node: Node in get_tree().get_nodes_in_group("units"):
 		var ally: Unit = node as Unit
-		if ally == self or ally == null or ally.is_dead or ally.team != team:
+		if ally == self or ally == null or ally.is_dead or ally.is_emerging or ally.team != team:
 			continue
 		var offset: Vector2 = global_position - ally.global_position
 		var distance: float = offset.length()
@@ -145,9 +157,15 @@ func _ally_separation() -> Vector2:
 	return push.limit_length(60.0)
 
 func _physics_process(delta: float) -> void:
-	if is_dead:
+	if is_dead or is_queued_for_deletion():
 		return
 	_attack_time_left = maxf(0.0, _attack_time_left - delta)
+	if not _is_valid_opponent(current_target):
+		current_target = null
+		_release_slot()
+	if is_emerging or actions.is_busy():
+		velocity = Vector2.ZERO
+		return
 	if not _is_valid_opponent(current_target):
 		current_target = _find_nearest_opponent()
 	if _slot_target != current_target or attack_mode != AttackMode.MELEE:
@@ -171,6 +189,9 @@ func _physics_process(delta: float) -> void:
 		else:
 			if distance <= attack_range:
 				_try_attack()
+	if actions.is_busy():
+		velocity = Vector2.ZERO
+		return
 	if not _is_valid_opponent(current_target) or current_target.get_instance_id() != _drift_partner_id or current_target.current_target != self:
 		_drift_partner_id = 0
 	velocity = _positioning_velocity()
@@ -195,6 +216,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _positioning_velocity() -> Vector2:
+	if is_dead or is_emerging or (actions != null and actions.is_busy()):
+		return Vector2.ZERO
 	var desired: Vector2 = Vector2.ZERO
 	if _is_valid_opponent(current_target):
 		if attack_mode == AttackMode.MELEE and engagement_slot >= 0:
@@ -221,33 +244,54 @@ func _find_nearest_opponent() -> Unit:
 
 
 func _is_valid_opponent(candidate: Unit) -> bool:
-	return is_instance_valid(candidate) and candidate != self and candidate.is_inside_tree() and not candidate.is_queued_for_deletion() and not candidate.is_dead and candidate.team != team
+	return is_instance_valid(candidate) and candidate != self and candidate.is_inside_tree() and not candidate.is_queued_for_deletion() and candidate.is_targetable() and candidate.team != team
 
 
 # Melee reach is measured from body edges; ranged distance remains unchanged.
-func _attack_reach() -> float:
-	if attack_mode == AttackMode.MELEE and _is_valid_opponent(current_target):
-		return attack_range + engagement_body_radius + current_target.engagement_body_radius
+func _attack_reach(target: Unit = null) -> float:
+	if target == null:
+		target = current_target
+	if attack_mode == AttackMode.MELEE and _is_valid_opponent(target):
+		return attack_range + engagement_body_radius + target.engagement_body_radius
 	return attack_range
 
 
 func _try_attack() -> void:
-	if is_dead or _attack_time_left > 0.0 or not _is_valid_opponent(current_target):
+	if is_dead or is_emerging or is_queued_for_deletion() or _attack_time_left > 0.0 or not _is_valid_opponent(current_target):
 		return
 	if global_position.distance_to(current_target.global_position) > _attack_reach():
 		return
+	var direction: Vector2 = global_position.direction_to(current_target.global_position)
+	if not actions.begin_attack(_resolve_attack, direction, attack_mode == AttackMode.PROJECTILE):
+		return
+	_attack_target = weakref(current_target)
 	_attack_time_left = attack_cooldown
-	_play_attack_cue(global_position.direction_to(current_target.global_position))
+
+func _resolve_attack() -> void:
+	var target: Unit = _attack_target.get_ref() as Unit if _attack_target != null else null
+	_attack_target = null
+	if is_dead or is_emerging or is_queued_for_deletion() or not _is_valid_opponent(target):
+		return
+	# Resolve only the captured target, never a replacement acquired during windup.
+	if global_position.distance_to(target.global_position) > _attack_reach(target):
+		return
 	if attack_mode == AttackMode.PROJECTILE:
-		_fire_projectile()
+		_fire_projectile(target)
 	else:
-		current_target.take_damage(attack_damage, current_target.global_position.direction_to(global_position))
-	if not _is_valid_opponent(current_target):
-		current_target = null
+		target.take_damage(attack_damage, target.global_position.direction_to(global_position))
+
+func is_targetable() -> bool:
+	return is_inside_tree() and not is_dead and not is_emerging and not is_queued_for_deletion()
+
+func _finish_emergence() -> void:
+	if is_dead:
+		return
+	is_emerging = false
+	_health_bar.show()
 
 
 func heal(amount: int) -> int:
-	if is_dead or is_queued_for_deletion() or amount <= 0:
+	if is_dead or is_emerging or is_queued_for_deletion() or amount <= 0:
 		return 0
 	var restored: int = mini(amount, maxi(0, max_health - current_health))
 	if restored == 0:
@@ -270,7 +314,7 @@ func heal(amount: int) -> int:
 
 
 func take_damage(amount: int, direction_to_source: Vector2 = Vector2.ZERO) -> void:
-	if is_dead or amount <= 0:
+	if is_dead or is_emerging or is_queued_for_deletion() or amount <= 0:
 		return
 	_update_facing()
 	var blocked: bool = block_enabled and not direction_to_source.is_zero_approx() and facing_direction.dot(direction_to_source.normalized()) >= cos(deg_to_rad(frontal_block_arc * 0.5)) - 0.000001
@@ -290,6 +334,8 @@ func _die() -> void:
 	if is_dead:
 		return
 	is_dead = true
+	_attack_target = null
+	actions.die()
 	_release_slot()
 	for owner_id: int in _slot_owners.values():
 		var owner: Unit = instance_from_id(owner_id) as Unit
@@ -302,29 +348,15 @@ func _die() -> void:
 	set_physics_process(false)
 	remove_from_group("units")
 	died.emit(self)
-	if _attack_tween != null:
-		_attack_tween.kill()
 	if _hit_tween != null:
 		_hit_tween.kill()
 	if _block_tween != null:
 		_block_tween.kill()
 	_visual.scale = _visual_rest_scale
 	_health_bar.hide()
-	_visual.position = _visual_rest_position
 	_visual.modulate = _visual_rest_modulate
 	# The fading corpse must not block other living units.
 	$CollisionShape2D.set_deferred("disabled", true)
-	var death_tween: Tween = create_tween()
-	death_tween.tween_property(_visual, "modulate:a", 0.0, 0.2)
-	death_tween.tween_callback(queue_free)
-
-
-func _play_attack_cue(direction: Vector2) -> void:
-	if _attack_tween != null:
-		_attack_tween.kill()
-	_visual.position = _visual_rest_position + direction * 3.0
-	_attack_tween = create_tween()
-	_attack_tween.tween_property(_visual, "position", _visual_rest_position, 0.12)
 
 
 func _update_health_bar() -> void:
@@ -339,15 +371,17 @@ func _play_hit_cue() -> void:
 	_hit_tween.tween_property(_visual, "modulate", _visual_rest_modulate, 0.1)
 
 
-func _fire_projectile() -> void:
-	if projectile_scene == null:
+func _fire_projectile(target: Unit = null) -> void:
+	if target == null:
+		target = current_target
+	if projectile_scene == null or not _is_valid_opponent(target):
 		return
 	var projectile: Projectile = projectile_scene.instantiate()
 	projectile.damage = attack_damage
 	projectile.speed = projectile_speed
 	projectile.source_team = team
-	projectile.target = current_target
-	var direction: Vector2 = global_position.direction_to(current_target.global_position)
+	projectile.target = target
+	var direction: Vector2 = global_position.direction_to(target.global_position)
 	var origin: Vector2 = global_position + Vector2(0, -30) + direction * 18.0
 	projectile.position = (get_parent() as Node2D).to_local(origin)
 	projectile.rotation = direction.angle()

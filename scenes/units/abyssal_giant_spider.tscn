@@ -5,6 +5,8 @@
 team = 1
 monster = ExtResource("2")
 unit_name = "Abyssal Giant Spider"
+action_style = "spider"
+action_parts = PackedStringArray("LLeg0", "LLeg1", "RLeg0", "RLeg1", "FangLeft", "FangRight")
 max_health = 80
 move_speed = 155.0
 attack_damage = 11
