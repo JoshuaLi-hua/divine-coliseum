@@ -1,6 +1,6 @@
 class_name BattleManager
 extends Node
-## Owns only enemy references and progression; player state persists untouched.
+## Tracks living arena enemies, including dynamic summons, and battle progression.
 signal changed
 const MILITIA: PackedScene = preload("res://scenes/units/arena_militia.tscn")
 const SWORDSMAN: PackedScene = preload("res://scenes/units/arena_swordsman.tscn")
@@ -9,12 +9,13 @@ const ARCHER: PackedScene = preload("res://scenes/units/arena_archer.tscn")
 const ORC: PackedScene = preload("res://scenes/units/wasteland_orc.tscn")
 const TROLL: PackedScene = preload("res://scenes/units/cave_troll.tscn")
 const SPIDER: PackedScene = preload("res://scenes/units/abyssal_giant_spider.tscn")
-const MONSTER_POSITIONS: Array[Vector2] = [Vector2(420, -90), Vector2(420, 90), Vector2(535, 0), Vector2(480, -220), Vector2(480, 220)]
+const BONECALLER: PackedScene = preload("res://scenes/units/bonecaller.tscn")
+const MONSTER_POSITIONS: Array[Vector2] = [Vector2(420, -90), Vector2(420, 90), Vector2(535, 0), Vector2(480, -220), Vector2(590, 180)]
 # Slots 0–2 are frontline; slots 3–4 use the farther-right spawn points.
 const BATTLES: Array = [
 	[MILITIA, MILITIA, SWORDSMAN],
 	[GUARD, SWORDSMAN, SWORDSMAN, ARCHER],
-	[ORC, ORC, TROLL, SPIDER, SPIDER],
+	[ORC, ORC, TROLL, SPIDER, BONECALLER],
 ]
 const SPAWN_POSITIONS: Array[Vector2] = [Vector2(420, -180), Vector2(420, 0), Vector2(420, 180), Vector2(540, -90), Vector2(540, 90)]
 var current_battle: int = 0
@@ -27,6 +28,9 @@ var shop_visited: bool = false
 @onready var _arena: Node2D = get_parent().get_node("Arena")
 
 func _ready() -> void:
+	get_tree().node_added.connect(_register_enemy)
+	for node: Node in get_tree().get_nodes_in_group("units"):
+		_register_enemy(node)
 	_start_next_battle.call_deferred()
 
 func _start_next_battle() -> void:
@@ -42,16 +46,43 @@ func _start_next_battle() -> void:
 		var enemy: Unit = enemy_scene.instantiate()
 		enemy.team = Unit.Team.ENEMY
 		enemy.position = MONSTER_POSITIONS[index] if current_battle == 3 else SPAWN_POSITIONS[index]
-		enemy.died.connect(_on_enemy_died)
-		active_enemies.append(enemy)
 		_arena.add_child(enemy)
 	changed.emit()
+
+func _register_enemy(node: Node) -> void:
+	var enemy: Unit = node as Unit
+	if enemy == null or enemy.team != Unit.Team.ENEMY or enemy.is_dead or not _arena.is_ancestor_of(enemy):
+		return
+	if active_enemies.has(enemy):
+		return
+	active_enemies.append(enemy)
+	enemy.died.connect(_on_enemy_died)
+	enemy.tree_exiting.connect(_on_enemy_exiting.bind(enemy))
+	# Defer UI updates until the newly added unit has completed ready.
+	changed.emit.call_deferred()
 
 func _on_enemy_died(enemy: Unit) -> void:
 	if not active_enemies.has(enemy):
 		return
 	GameManager.record_monster_defeat(enemy)
 	active_enemies.erase(enemy)
+	_check_battle_clear()
+
+func _on_enemy_exiting(enemy: Unit) -> void:
+	if not active_enemies.has(enemy):
+		return
+	active_enemies.erase(enemy)
+	_check_battle_clear.call_deferred()
+
+func _check_battle_clear() -> void:
+	if not is_inside_tree() or current_battle == 0 or between_battles or victory:
+		return
+	# The arena's living units are authoritative, not the original wave list.
+	active_enemies.clear()
+	for node: Node in get_tree().get_nodes_in_group("units"):
+		var enemy: Unit = node as Unit
+		if enemy != null and enemy.team == Unit.Team.ENEMY and not enemy.is_dead and not enemy.is_queued_for_deletion() and _arena.is_ancestor_of(enemy):
+			active_enemies.append(enemy)
 	if active_enemies.is_empty():
 		if current_battle == BATTLES.size():
 			victory = true

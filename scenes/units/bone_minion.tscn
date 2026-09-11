@@ -1,0 +1,63 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1_unit"]
+
+[node name="BoneMinion" instance=ExtResource("1_unit")]
+team = 1
+unit_name = "Bone Minion"
+max_health = 45
+move_speed = 110.0
+attack_damage = 7
+attack_range = 42.0
+attack_cooldown = 1.2
+
+[node name="SkeletonOutline" type="Polygon2D" parent="Visual" index="0"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-8, -35, 7, -35, 10, -17, 6, -11, 10, 0, 3, 0, 0, -11, -3, 0, -10, 0, -6, -13, -10, -20)
+
+[node name="Legs" type="Polygon2D" parent="Visual" index="1"]
+color = Color(0.8, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-6, -14, 5, -14, 5, -8, 8, -2, 4, -2, 0, -12, -4, -2, -7, -2, -4, -9)
+
+[node name="Spine" type="Polygon2D" parent="Visual" index="2"]
+color = Color(0.8, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-2, -33, 1, -33, 2, -15, -2, -15)
+
+[node name="RibTop" type="Polygon2D" parent="Visual" index="3"]
+color = Color(0.8, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-7, -31, 6, -31, 6, -28, -7, -28)
+
+[node name="RibMiddle" type="Polygon2D" parent="Visual" index="4"]
+color = Color(0.8, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-7, -26, 6, -26, 6, -23, -7, -23)
+
+[node name="RibBottom" type="Polygon2D" parent="Visual" index="5"]
+color = Color(0.8, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-6, -21, 5, -21, 4, -18, -5, -18)
+
+[node name="SkullOutline" type="Polygon2D" parent="Visual" index="6"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-8, -46, 6, -46, 9, -40, 6, -32, -6, -32, -10, -39)
+
+[node name="Skull" type="Polygon2D" parent="Visual" index="7"]
+color = Color(0.94, 0.94, 0.94, 1)
+polygon = PackedVector2Array(-6, -44, 4, -44, 6, -40, 4, -34, -4, -34, -7, -39)
+
+[node name="EyeSockets" type="Polygon2D" parent="Visual" index="8"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-5, -41, 4, -41, 4, -38, 1, -38, 0, -40, -1, -38, -5, -38)
+
+[node name="Sword" type="Polygon2D" parent="Visual" index="9"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-18, -39, -15, -43, -12, -39, -13, -20, -10, -20, -10, -17, -14, -17, -14, -12, -17, -12, -17, -17, -20, -17, -20, -20, -17, -20)
+
+[node name="Blade" type="Polygon2D" parent="Visual" index="10"]
+color = Color(0.8, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-16, -38, -15, -40, -14, -38, -14, -22, -16, -22)
+
+[node name="Arm" type="Polygon2D" parent="Visual" index="11"]
+color = Color(0.8, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-7, -30, -11, -27, -12, -20, -16, -20, -16, -24, -13, -30, -8, -33)
+
+[node name="HealthBar" parent="." index="2"]
+position = Vector2(-20, -57)

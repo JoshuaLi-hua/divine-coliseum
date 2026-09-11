@@ -1,0 +1,67 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1_unit"]
+[ext_resource type="PackedScene" path="res://scenes/projectiles/projectile.tscn" id="2_projectile"]
+[ext_resource type="Script" path="res://scenes/units/combat_summoner.gd" id="3_summoner"]
+[ext_resource type="PackedScene" path="res://scenes/units/bone_minion.tscn" id="4_minion"]
+
+[node name="Bonecaller" instance=ExtResource("1_unit")]
+team = 1
+unit_name = "Bonecaller"
+max_health = 95
+move_speed = 70.0
+attack_damage = 6
+attack_range = 230.0
+attack_cooldown = 1.8
+attack_mode = 1
+projectile_scene = ExtResource("2_projectile")
+
+[node name="Robe" type="Polygon2D" parent="Visual" index="0"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-10, -43, 9, -43, 20, 0, 7, -4, 0, 0, -8, -4, -20, 0)
+
+[node name="RobeFold" type="Polygon2D" parent="Visual" index="1"]
+color = Color(0.3, 0.3, 0.3, 1)
+polygon = PackedVector2Array(-6, -39, 3, -39, 10, -6, 0, -10, -10, -6)
+
+[node name="Hood" type="Polygon2D" parent="Visual" index="2"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-13, -45, -9, -59, 0, -69, 10, -59, 13, -45, 5, -38, -6, -38)
+
+[node name="Skull" type="Polygon2D" parent="Visual" index="3"]
+color = Color(0.8, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-7, -56, 6, -56, 8, -49, 4, -45, 4, -41, -4, -41, -4, -45, -8, -49)
+
+[node name="LeftSocket" type="Polygon2D" parent="Visual" index="4"]
+color = Color(0.025, 0.025, 0.025, 1)
+polygon = PackedVector2Array(-6, -52, -1, -51, -2, -48, -6, -48)
+
+[node name="RightSocket" type="Polygon2D" parent="Visual" index="5"]
+color = Color(0.025, 0.025, 0.025, 1)
+polygon = PackedVector2Array(1, -51, 6, -52, 6, -48, 2, -48)
+
+[node name="Jaw" type="Polygon2D" parent="Visual" index="6"]
+color = Color(0.3, 0.3, 0.3, 1)
+polygon = PackedVector2Array(-3, -45, 3, -45, 3, -43, -3, -43)
+
+[node name="Sleeve" type="Polygon2D" parent="Visual" index="7"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-7, -40, -23, -32, -19, -23, -4, -30)
+
+[node name="Hand" type="Polygon2D" parent="Visual" index="8"]
+color = Color(0.8, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-24, -33, -18, -33, -18, -28, -24, -28)
+
+[node name="Staff" type="Polygon2D" parent="Visual" index="9"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-26, -62, -22, -62, -22, 0, -26, 0)
+
+[node name="StaffCrown" type="Polygon2D" parent="Visual" index="10"]
+color = Color(0.8, 0.8, 0.8, 1)
+polygon = PackedVector2Array(-32, -63, -30, -72, -27, -65, -21, -65, -18, -72, -16, -63, -21, -58, -27, -58)
+
+[node name="Summoning" type="Node" parent="." ]
+script = ExtResource("3_summoner")
+summon_scene = ExtResource("4_minion")
+summon_cooldown = 6.0
+max_active_summons = 3
