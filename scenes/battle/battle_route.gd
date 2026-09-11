@@ -1,6 +1,6 @@
 class_name BattleRoute
 extends RefCounted
-## The full route, including its deliberately empty boss boundary.
+## The full route, including the final boss encounter.
 const MILITIA: PackedScene = preload("res://scenes/units/arena_militia.tscn")
 const SWORDSMAN: PackedScene = preload("res://scenes/units/arena_swordsman.tscn")
 const GUARD: PackedScene = preload("res://scenes/units/shield_guard.tscn")
@@ -9,6 +9,7 @@ const ORC: PackedScene = preload("res://scenes/units/wasteland_orc.tscn")
 const TROLL: PackedScene = preload("res://scenes/units/cave_troll.tscn")
 const SPIDER: PackedScene = preload("res://scenes/units/abyssal_giant_spider.tscn")
 const BONECALLER: PackedScene = preload("res://scenes/units/bonecaller.tscn")
+const HOLLOW_KING: PackedScene = preload("res://scenes/bosses/hollow_king.tscn")
 const NORMAL = BattleDefinition.BattleType.NORMAL
 const ELITE = BattleDefinition.BattleType.ELITE
 const BOSS = BattleDefinition.BattleType.BOSS
@@ -29,7 +30,7 @@ static func create() -> Array[BattleDefinition]:
 		BattleDefinition.new(7, NORMAL, [GUARD, GUARD, ORC, ORC, BONECALLER, ARCHER, ARCHER]),
 		BattleDefinition.new(8, NORMAL, [TROLL, ORC, ORC, SPIDER, SPIDER, BONECALLER, BONECALLER]),
 		BattleDefinition.new(9, NORMAL, [TROLL, TROLL, GUARD, GUARD, ORC, ORC, BONECALLER, ARCHER, ARCHER]),
-		BattleDefinition.new(10, BOSS, []),
+		BattleDefinition.new(10, BOSS, [HOLLOW_KING]),
 	]
 	for definition: BattleDefinition in route:
 		definition.spawn_positions.assign(FORMATION.slice(0, definition.enemies.size()))
@@ -42,6 +43,5 @@ static func create() -> Array[BattleDefinition]:
 	route[4].special_label = "ELITE BATTLE 5/10"
 	route[8].shop_after = true
 	route[9].reward_type = BattleDefinition.RewardType.NONE
-	route[9].placeholder = true
-	route[9].special_label = "BOSS IN DEVELOPMENT"
+	route[9].spawn_positions.assign([Vector2(450, 0)])
 	return route

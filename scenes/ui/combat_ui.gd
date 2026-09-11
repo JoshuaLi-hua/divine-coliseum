@@ -19,6 +19,8 @@ var _reward_cards: Array[CardData] = []
 var _reward_battle: int = 0
 var _shop_cards: Array[CardData] = []
 var _restarting: bool = false
+const BOSS_HEALTH_UI = preload("res://scenes/ui/boss_health_ui.gd")
+var _boss_ui: Control
 
 const CARD_SCENE: PackedScene = preload("res://scenes/cards/card.tscn")
 const KNIGHT: CardData = preload("res://scenes/cards/ironbound_knight.tres")
@@ -38,6 +40,8 @@ func _ready() -> void:
 	GameManager.gold_changed.connect(_update_gold)
 	GameManager.reset_run_state()
 	GameManager.champion.changed.connect(_refresh_shop)
+	_boss_ui = BOSS_HEALTH_UI.new()
+	$Screen.add_child(_boss_ui)
 	_reward = REWARD_OVERLAY.new()
 	$Screen.add_child(_reward)
 	_reward.reward_chosen.connect(_choose_reward)
@@ -134,9 +138,14 @@ func _update_battle() -> void:
 		_shop_cards = CardCatalog.draw_offers(GameManager.get_eligible_cards(), 3)
 		_shop.configure_offers(_shop_cards)
 	_shop.visible = _battle.shop_open
-	$Screen/BossMessage.visible = _battle.boss_boundary
-	$Screen/BossMessage.text = "BATTLE %d/%d\nBOSS\n%s" % [_battle.current_battle, _battle.route.size(), definition.special_label]
-	$Screen/NewRun.visible = _battle.boss_boundary
+	$Screen/VictoryShade.visible = _battle.victory
+	$Screen/BossMessage.visible = _battle.victory
+	$Screen/BossMessage.text = "VICTORY\nTHE HOLLOW KING HAS FALLEN\nRUN COMPLETE"
+	if definition.type == BattleDefinition.BattleType.BOSS:
+		for enemy: Unit in _battle.active_enemies:
+			if enemy is HollowKing and not enemy.is_dead:
+				_boss_ui.bind_boss(enemy)
+	$Screen/NewRun.visible = _battle.victory
 	$Screen/Bestiary.disabled = not _can_open_bestiary()
 	_refresh_shop()
 	for card: SummonCard in _hand.get_children():
@@ -238,7 +247,7 @@ func _learn_skill(skill_id: StringName) -> void:
 
 
 func _new_run() -> void:
-	if not _battle.boss_boundary or _restarting or _bestiary.visible or get_tree().paused:
+	if not _battle.victory or _restarting or _bestiary.visible or get_tree().paused:
 		return
 	_restarting = true
 	$Screen/NewRun.disabled = true

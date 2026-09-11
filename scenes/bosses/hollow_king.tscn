@@ -1,0 +1,121 @@
+[gd_scene load_steps=5 format=3]
+[ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1"]
+[ext_resource type="Script" path="res://scenes/bosses/hollow_king.gd" id="2"]
+[ext_resource type="Script" path="res://scenes/bosses/boss_reinforcements.gd" id="3"]
+[sub_resource type="CircleShape2D" id="BossBody"]
+radius = 38.0
+[node name="HollowKing" instance=ExtResource("1")]
+script = ExtResource("2")
+team = 1
+unit_name = "The Hollow King"
+action_style = "hollow_king"
+action_parts = PackedStringArray("GauntletLeft", "GauntletRight", "WeaponOutline", "Blade", "BladeEdge", "Grip", "Crossguard")
+engagement_body_radius = 42.0
+max_health = 1800
+move_speed = 52.0
+attack_damage = 34
+attack_range = 68.0
+attack_cooldown = 2.2
+[node name="CollisionShape2D" parent="." index="1"]
+position = Vector2(0, -20)
+shape = SubResource("BossBody")
+[node name="HealthBar" parent="." index="2"]
+position = Vector2(-20, -183)
+[node name="Reinforcements" type="Node" parent="."]
+script = ExtResource("3")
+
+[node name="Cloak" type="Polygon2D" parent="Visual" index="0"]
+color = Color(0.06, 0.06, 0.06, 1)
+polygon = PackedVector2Array(-38, -124, -54, -108, -52, -62, -66, -7, -43, -18, -34, 3, -15, -10, 0, 4, 18, -13, 36, 2, 49, -17, 64, -6, 48, -64, 52, -106, 36, -123)
+
+[node name="CloakFoldLeft" type="Polygon2D" parent="Visual" index="1"]
+color = Color(0.25, 0.25, 0.25, 1)
+polygon = PackedVector2Array(-37, -115, -46, -76, -51, -24, -39, -40, -25, -98)
+
+[node name="CloakFoldRight" type="Polygon2D" parent="Visual" index="2"]
+color = Color(0.18, 0.18, 0.18, 1)
+polygon = PackedVector2Array(29, -112, 43, -76, 46, -21, 29, -34, 18, -97)
+
+[node name="Boots" type="Polygon2D" parent="Visual" index="3"]
+color = Color(0.04, 0.04, 0.04, 1)
+polygon = PackedVector2Array(-24, -35, -4, -35, -4, -7, -10, 0, -36, 0, -36, -9, -26, -12, 7, -35, 25, -35, 27, -12, 37, -9, 37, 0, 9, 0, 4, -8)
+
+[node name="ArmorOutline" type="Polygon2D" parent="Visual" index="4"]
+color = Color(0.04, 0.04, 0.04, 1)
+polygon = PackedVector2Array(-36, -128, 34, -128, 43, -108, 33, -55, 16, -36, -17, -36, -34, -56, -43, -108)
+
+[node name="Breastplate" type="Polygon2D" parent="Visual" index="5"]
+color = Color(0.65, 0.65, 0.65, 1)
+polygon = PackedVector2Array(-28, -120, 26, -120, 32, -101, 24, -62, 0, -48, -25, -63, -33, -102)
+
+[node name="ArmorRidge" type="Polygon2D" parent="Visual" index="6"]
+color = Color(0.9, 0.9, 0.9, 1)
+polygon = PackedVector2Array(-2, -118, 3, -118, 7, -68, 0, -54, -7, -68)
+
+[node name="Belt" type="Polygon2D" parent="Visual" index="7"]
+color = Color(0.12, 0.12, 0.12, 1)
+polygon = PackedVector2Array(-28, -68, 26, -68, 27, -55, -27, -55)
+
+[node name="Buckle" type="Polygon2D" parent="Visual" index="8"]
+color = Color(0.85, 0.85, 0.85, 1)
+polygon = PackedVector2Array(-7, -67, 7, -67, 7, -55, -7, -55)
+
+[node name="ShoulderLeft" type="Polygon2D" parent="Visual" index="9"]
+color = Color(0.4, 0.4, 0.4, 1)
+polygon = PackedVector2Array(-28, -126, -50, -127, -62, -109, -42, -94, -27, -104)
+
+[node name="ShoulderRight" type="Polygon2D" parent="Visual" index="10"]
+color = Color(0.5, 0.5, 0.5, 1)
+polygon = PackedVector2Array(26, -126, 49, -127, 61, -108, 41, -94, 27, -104)
+
+[node name="HeadOutline" type="Polygon2D" parent="Visual" index="11"]
+color = Color(0.03, 0.03, 0.03, 1)
+polygon = PackedVector2Array(-22, -155, 20, -155, 23, -126, 12, -113, -13, -113, -24, -128)
+
+[node name="Mask" type="Polygon2D" parent="Visual" index="12"]
+color = Color(0.82, 0.82, 0.82, 1)
+polygon = PackedVector2Array(-15, -149, 14, -149, 16, -128, 7, -119, -8, -119, -17, -129)
+
+[node name="Eyes" type="Polygon2D" parent="Visual" index="13"]
+color = Color(0.02, 0.02, 0.02, 1)
+polygon = PackedVector2Array(-14, -140, -4, -139, -4, -133, -14, -134, 4, -139, 13, -140, 13, -134, 4, -133)
+
+[node name="MaskSplit" type="Polygon2D" parent="Visual" index="14"]
+color = Color(0.2, 0.2, 0.2, 1)
+polygon = PackedVector2Array(-2, -148, 2, -148, 2, -120, -2, -120)
+
+[node name="Crown" type="Polygon2D" parent="Visual" index="15"]
+color = Color(0.85, 0.85, 0.85, 1)
+polygon = PackedVector2Array(-25, -155, -29, -174, -18, -166, -13, -180, -7, -162, 0, -174, 6, -162, 13, -170, 19, -166, 23, -176, 25, -155)
+
+[node name="CrownBand" type="Polygon2D" parent="Visual" index="16"]
+color = Color(0.2, 0.2, 0.2, 1)
+polygon = PackedVector2Array(-24, -157, 24, -157, 24, -152, -24, -152)
+
+[node name="GauntletLeft" type="Polygon2D" parent="Visual" index="17"]
+color = Color(0.7, 0.7, 0.7, 1)
+polygon = PackedVector2Array(-45, -102, -29, -98, -25, -82, -36, -74, -49, -84)
+
+[node name="GauntletRight" type="Polygon2D" parent="Visual" index="18"]
+color = Color(0.6, 0.6, 0.6, 1)
+polygon = PackedVector2Array(39, -103, 50, -89, -20, -72, -34, -80, -30, -90)
+
+[node name="WeaponOutline" type="Polygon2D" parent="Visual" index="19"]
+color = Color(0.02, 0.02, 0.02, 1)
+polygon = PackedVector2Array(-34, -82, -28, -87, -88, -162, -99, -159, -104, -146, -44, -77)
+
+[node name="Blade" type="Polygon2D" parent="Visual" index="20"]
+color = Color(0.6, 0.6, 0.6, 1)
+polygon = PackedVector2Array(-36, -83, -31, -87, -89, -155, -96, -153, -98, -146, -43, -82)
+
+[node name="BladeEdge" type="Polygon2D" parent="Visual" index="21"]
+color = Color(0.95, 0.95, 0.95, 1)
+polygon = PackedVector2Array(-96, -153, -98, -146, -43, -82, -39, -83, -91, -147)
+
+[node name="Grip" type="Polygon2D" parent="Visual" index="22"]
+color = Color(0.25, 0.25, 0.25, 1)
+polygon = PackedVector2Array(-36, -87, -30, -90, -14, -67, -20, -64)
+
+[node name="Crossguard" type="Polygon2D" parent="Visual" index="23"]
+color = Color(0.85, 0.85, 0.85, 1)
+polygon = PackedVector2Array(-49, -85, -30, -103, -25, -99, -44, -80)

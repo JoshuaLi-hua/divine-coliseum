@@ -7,7 +7,7 @@ signal died(unit: Unit)
 enum Team { PLAYER, ENEMY }
 enum AttackMode { MELEE, PROJECTILE }
 
-@export_enum("knight", "militia", "swordsman", "guard", "archer", "healer", "orc", "troll", "spider", "bonecaller", "minion") var action_style: String = "militia"
+@export_enum("knight", "militia", "swordsman", "guard", "archer", "healer", "orc", "troll", "spider", "bonecaller", "minion", "hollow_king") var action_style: String = "militia"
 @export var action_parts: PackedStringArray = []
 @export var emerge_on_spawn: bool = false
 var is_emerging: bool = false
@@ -63,6 +63,10 @@ func _ready() -> void:
 		is_emerging = true
 		_health_bar.hide()
 		actions.begin_emergence(0.85, _finish_emergence)
+
+
+func create_action_presenter() -> UnitActionVisual:
+	return UnitActionVisual.new()
 
 
 # Target-owned reservations store instance IDs, never strong references.

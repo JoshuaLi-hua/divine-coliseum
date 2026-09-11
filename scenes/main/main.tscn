@@ -1,10 +1,8 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene format=3 uid="uid://3bl5718043hs"]
 
 [ext_resource type="PackedScene" path="res://scenes/arena/arena.tscn" id="1_arena"]
-
-[ext_resource type="Script" path="res://scenes/ui/combat_ui.gd" id="2_ui"]
-
-[ext_resource type="Script" path="res://scenes/battle/battle_manager.gd" id="3_battle"]
+[ext_resource type="Script" uid="uid://c3sg7cdjhaosg" path="res://scenes/ui/combat_ui.gd" id="2_ui"]
+[ext_resource type="Script" uid="uid://bmromo8grmidk" path="res://scenes/battle/battle_manager.gd" id="3_battle"]
 
 [sub_resource type="StyleBoxFlat" id="Style_new_run"]
 bg_color = Color(0.05, 0.05, 0.05, 1)
@@ -22,14 +20,15 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(1, 1, 1, 1)
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" unique_id=419275295]
 
-[node name="Arena" parent="." instance=ExtResource("1_arena")]
+[node name="Arena" parent="." unique_id=278142615 instance=ExtResource("1_arena")]
 
-[node name="CombatUI" type="CanvasLayer" parent="."]
+[node name="CombatUI" type="CanvasLayer" parent="." unique_id=1346694111]
 script = ExtResource("2_ui")
 
-[node name="Screen" type="Control" parent="CombatUI"]
+[node name="Screen" type="Control" parent="CombatUI" unique_id=344504354]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -37,18 +36,19 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="DivinePower" type="Label" parent="CombatUI/Screen"]
+[node name="DivinePower" type="Label" parent="CombatUI/Screen" unique_id=862516734]
+layout_mode = 0
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -330.0
 offset_top = 22.0
 offset_right = -24.0
 offset_bottom = 58.0
-mouse_filter = 2
 theme_override_font_sizes/font_size = 26
 horizontal_alignment = 2
 
-[node name="Hand" type="Control" parent="CombatUI/Screen"]
+[node name="Hand" type="Control" parent="CombatUI/Screen" unique_id=102891974]
+anchors_preset = 0
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -56,52 +56,57 @@ anchor_bottom = 1.0
 offset_top = -130.0
 mouse_filter = 2
 
-[node name="Piles" type="Label" parent="CombatUI/Screen"]
+[node name="Piles" type="Label" parent="CombatUI/Screen" unique_id=1098289908]
+layout_mode = 0
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 24.0
 offset_top = -90.0
 offset_right = 240.0
 offset_bottom = -24.0
-mouse_filter = 2
 theme_override_font_sizes/font_size = 22
 
-[node name="BattleManager" type="Node" parent="."]
-script = ExtResource("3_battle")
-
-[node name="BattleStatus" type="Label" parent="CombatUI/Screen"]
+[node name="BattleStatus" type="Label" parent="CombatUI/Screen" unique_id=1792875285]
+layout_mode = 0
 offset_left = 24.0
 offset_top = 16.0
 offset_right = 310.0
 offset_bottom = 116.0
-mouse_filter = 2
 theme_override_font_sizes/font_size = 24
 
-[node name="BattleMessage" type="Label" parent="CombatUI/Screen"]
+[node name="BattleMessage" type="Label" parent="CombatUI/Screen" unique_id=51240757]
+layout_mode = 0
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -240.0
 offset_top = 24.0
 offset_right = 240.0
 offset_bottom = 64.0
-mouse_filter = 2
 theme_override_font_sizes/font_size = 30
 horizontal_alignment = 1
 
-[node name="Gold" type="Label" parent="CombatUI/Screen"]
+[node name="Gold" type="Label" parent="CombatUI/Screen" unique_id=482168425]
+layout_mode = 0
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -330.0
 offset_top = 62.0
 offset_right = -24.0
 offset_bottom = 98.0
-mouse_filter = 2
 theme_override_font_sizes/font_size = 24
 horizontal_alignment = 2
 
-
-[node name="NewRun" type="Button" parent="CombatUI/Screen"]
+[node name="VictoryShade" type="ColorRect" parent="CombatUI/Screen" unique_id=1179465234]
 visible = false
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 0.8)
+
+[node name="NewRun" type="Button" parent="CombatUI/Screen" unique_id=860837790]
+visible = false
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -112,27 +117,29 @@ offset_right = 115.0
 offset_bottom = 150.0
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("Style_new_run")
-theme_override_styles/hover = SubResource("Style_new_run_hover")
 theme_override_styles/pressed = SubResource("Style_new_run_hover")
+theme_override_styles/hover = SubResource("Style_new_run_hover")
 theme_override_styles/focus = SubResource("Style_new_run_hover")
 text = "NEW RUN"
 
-
-[node name="Bestiary" type="Button" parent="CombatUI/Screen"]
+[node name="Bestiary" type="Button" parent="CombatUI/Screen" unique_id=664640560]
 process_mode = 3
+visible = false
+layout_mode = 0
 offset_left = 24.0
 offset_top = 128.0
 offset_right = 224.0
 offset_bottom = 180.0
-disabled = true
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("Style_new_run")
-theme_override_styles/hover = SubResource("Style_new_run_hover")
 theme_override_styles/pressed = SubResource("Style_new_run_hover")
+theme_override_styles/hover = SubResource("Style_new_run_hover")
+disabled = true
 text = "BESTIARY"
 
-[node name="BossMessage" type="Label" parent="CombatUI/Screen"]
+[node name="BossMessage" type="Label" parent="CombatUI/Screen" unique_id=830876302]
 visible = false
+layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -141,6 +148,8 @@ offset_left = -420.0
 offset_top = -120.0
 offset_right = 420.0
 offset_bottom = 30.0
-mouse_filter = 2
 theme_override_font_sizes/font_size = 34
 horizontal_alignment = 1
+
+[node name="BattleManager" type="Node" parent="." unique_id=1528710078]
+script = ExtResource("3_battle")

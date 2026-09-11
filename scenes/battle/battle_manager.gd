@@ -2,20 +2,19 @@ class_name BattleManager
 extends Node
 ## Tracks living arena enemies, including dynamic summons, and battle progression.
 signal changed
-enum Phase { SETUP, COMBAT, REWARD, SHOP, ADVANCING, BOSS_BOUNDARY }
+enum Phase { SETUP, COMBAT, REWARD, SHOP, ADVANCING, VICTORY }
 var route: Array[BattleDefinition] = BattleRoute.create()
 var phase: Phase = Phase.SETUP
 var current_battle: int = 0
 var active_enemies: Array[Unit] = []
 var reward_selected: bool = false
 var shop_visit: int = 0
-var victory: bool = false
+var victory: bool:
+	get: return phase == Phase.VICTORY
 var between_battles: bool:
 	get: return phase in [Phase.REWARD, Phase.SHOP]
 var shop_open: bool:
 	get: return phase == Phase.SHOP
-var boss_boundary: bool:
-	get: return phase == Phase.BOSS_BOUNDARY
 @onready var _arena: Node2D = get_parent().get_node("Arena")
 
 func _ready() -> void:
@@ -36,12 +35,6 @@ func _start_next_battle() -> void:
 	current_battle += 1
 	reward_selected = false
 	var definition: BattleDefinition = current_definition()
-	if definition.placeholder:
-		phase = Phase.BOSS_BOUNDARY
-		# Freeze all surviving combat actors, casts, and projectiles, not the UI.
-		_arena.process_mode = Node.PROCESS_MODE_DISABLED
-		changed.emit()
-		return
 	phase = Phase.COMBAT
 	for index: int in range(definition.enemies.size()):
 		var enemy: Unit = definition.enemies[index].instantiate()
@@ -109,7 +102,9 @@ func _check_battle_clear() -> void:
 			active_enemies.append(enemy)
 	if active_enemies.is_empty():
 		reward_selected = false
-		if current_definition().reward_type != BattleDefinition.RewardType.NONE:
+		if current_battle == route.size():
+			phase = Phase.VICTORY
+		elif current_definition().reward_type != BattleDefinition.RewardType.NONE:
 			phase = Phase.REWARD
 		elif current_definition().shop_after:
 			_open_shop()

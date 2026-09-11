@@ -11,11 +11,13 @@ const ATTACK_TIMES: Dictionary = {
 	"orc": Vector2(0.30, 0.27), "troll": Vector2(0.48, 0.38),
 	"spider": Vector2(0.09, 0.13), "bonecaller": Vector2(0.34, 0.22),
 	"minion": Vector2(0.13, 0.14),
+	"hollow_king": Vector2(0.52, 0.46),
 }
 const DEATH_TIMES: Dictionary = {
 	"knight": 0.65, "militia": 0.40, "swordsman": 0.50, "guard": 0.72,
 	"archer": 0.55, "healer": 0.68, "orc": 0.62, "troll": 0.95,
 	"spider": 0.48, "bonecaller": 0.78, "minion": 0.44,
+	"hollow_king": 1.65,
 }
 var state: StringName = &"idle"
 var phase: StringName = &"idle"
@@ -40,7 +42,7 @@ var _cast_prepare: Callable
 
 func setup(unit: Unit, visual: Node2D, parts: PackedStringArray) -> void:
 	_unit = unit
-	presenter = UnitActionVisual.new()
+	presenter = unit.create_action_presenter()
 	presenter.name = "ActionVisual"
 	unit.add_child(presenter)
 	presenter.setup(visual, unit.action_style, parts)
@@ -71,6 +73,19 @@ func configure_cast(kind: StringName, interval: float, anticipation: float, call
 	_cast_callback = callback
 	_cast_eligible = eligible
 	_cast_prepare = prepare
+
+func begin_special(kind: StringName, windup: float, recovery: float, callback: Callable, direction: Vector2) -> bool:
+	if is_busy() or _unit.is_dead or _unit.is_emerging or _unit.is_queued_for_deletion():
+		return false
+	_begin(kind, windup, recovery, callback, direction)
+	return true
+
+func cancel_current() -> void:
+	# A phase interruption discards the pending impact and its warning together.
+	_callback = Callable()
+	state = &"idle"
+	phase = &"idle"
+	presenter.locomotion(0.0, false, _unit.facing_direction)
 
 func begin_emergence(duration: float, callback: Callable) -> void:
 	_begin(&"emerge", duration, 0.0, callback, _unit.facing_direction)
