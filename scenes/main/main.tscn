@@ -73,7 +73,7 @@ script = ExtResource("3_battle")
 offset_left = 24.0
 offset_top = 16.0
 offset_right = 310.0
-offset_bottom = 84.0
+offset_bottom = 116.0
 mouse_filter = 2
 theme_override_font_sizes/font_size = 24
 
@@ -103,7 +103,9 @@ horizontal_alignment = 2
 [node name="NewRun" type="Button" parent="CombatUI/Screen"]
 visible = false
 anchor_left = 0.5
+anchor_top = 0.5
 anchor_right = 0.5
+anchor_bottom = 0.5
 offset_left = -115.0
 offset_top = 90.0
 offset_right = 115.0
@@ -119,12 +121,26 @@ text = "NEW RUN"
 [node name="Bestiary" type="Button" parent="CombatUI/Screen"]
 process_mode = 3
 offset_left = 24.0
-offset_top = 100.0
+offset_top = 128.0
 offset_right = 224.0
-offset_bottom = 152.0
+offset_bottom = 180.0
 disabled = true
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("Style_new_run")
 theme_override_styles/hover = SubResource("Style_new_run_hover")
 theme_override_styles/pressed = SubResource("Style_new_run_hover")
 text = "BESTIARY"
+
+[node name="BossMessage" type="Label" parent="CombatUI/Screen"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -120.0
+offset_right = 420.0
+offset_bottom = 30.0
+mouse_filter = 2
+theme_override_font_sizes/font_size = 34
+horizontal_alignment = 1

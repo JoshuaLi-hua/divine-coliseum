@@ -7,6 +7,10 @@ const UNLOCK_NOTICE = preload("res://scenes/ui/monster_unlock_notice.gd")
 var _unlock_notice: Control
 const REWARD_OVERLAY = preload("res://scenes/ui/reward_overlay.gd")
 var _reward: Control
+const ELITE_REWARD_OVERLAY = preload("res://scenes/ui/elite_reward_overlay.gd")
+var _elite_reward: Control
+var _elite_reward_battle: int = 0
+var _shop_visit: int = 0
 const SHOP_OVERLAY = preload("res://scenes/ui/shop_overlay.gd")
 const UPGRADE_COST: int = 75
 var _shop: Control
@@ -38,6 +42,12 @@ func _ready() -> void:
 	$Screen.add_child(_reward)
 	_reward.reward_chosen.connect(_choose_reward)
 	_reward.continued.connect(_continue_reward)
+	_elite_reward = ELITE_REWARD_OVERLAY.new()
+	$Screen.add_child(_elite_reward)
+	_elite_reward.gold_chosen.connect(_choose_elite_gold)
+	_elite_reward.upgrade_requested.connect(_open_elite_upgrade)
+	_elite_reward.card_chosen.connect(_choose_elite_upgrade)
+	_elite_reward.continued.connect(_continue_reward)
 	_shop = SHOP_OVERLAY.new()
 	$Screen.add_child(_shop)
 	_shop.purchase_requested.connect(_buy_card)
@@ -97,26 +107,59 @@ func _on_card_dropped(card: SummonCard, viewport_position: Vector2) -> void:
 
 
 func _update_battle() -> void:
-	$Screen/BattleStatus.text = "Battle %d / %d\nEnemies: %d" % [_battle.current_battle, _battle.BATTLES.size(), _battle.active_enemies.size()]
-	$Screen/BattleMessage.text = "VICTORY" if _battle.victory else ("BATTLE CLEARED" if _battle.between_battles else "")
-	if _battle.between_battles and not _battle.shop_open:
+	var definition: BattleDefinition = _battle.current_definition()
+	if definition == null:
+		return
+	$Screen/BattleStatus.text = "BATTLE %d/%d\n%s\nEnemies: %d" % [_battle.current_battle, _battle.route.size(), definition.type_label(), _battle.active_enemies.size()]
+	$Screen/BattleMessage.text = definition.special_label if _battle.is_combat_active() else ""
+	var normal_reward: bool = _battle.phase == BattleManager.Phase.REWARD and definition.reward_type == BattleDefinition.RewardType.NORMAL
+	var elite_reward: bool = _battle.phase == BattleManager.Phase.REWARD and definition.reward_type == BattleDefinition.RewardType.ELITE
+	if normal_reward:
 		if _reward_battle != _battle.current_battle:
 			_reward_battle = _battle.current_battle
 			_reward_cards = CardCatalog.draw_offers(GameManager.get_eligible_cards(), 2)
 			_reward.open(_reward_cards)
 	else:
 		_reward.hide()
-	if _battle.shop_open and _shop_cards.is_empty():
+	if elite_reward:
+		if _elite_reward_battle != _battle.current_battle:
+			_elite_reward_battle = _battle.current_battle
+			_elite_reward.open(deck.has_upgradeable_cards())
+	else:
+		_elite_reward.hide()
+	if _battle.shop_open and _shop_visit != _battle.shop_visit:
+		_shop_visit = _battle.shop_visit
+		_purchased.fill(false)
+		_shop.close_selection()
 		_shop_cards = CardCatalog.draw_offers(GameManager.get_eligible_cards(), 3)
 		_shop.configure_offers(_shop_cards)
 	_shop.visible = _battle.shop_open
-	$Screen/NewRun.visible = _battle.victory
+	$Screen/BossMessage.visible = _battle.boss_boundary
+	$Screen/BossMessage.text = "BATTLE %d/%d\nBOSS\n%s" % [_battle.current_battle, _battle.route.size(), definition.special_label]
+	$Screen/NewRun.visible = _battle.boss_boundary
 	$Screen/Bestiary.disabled = not _can_open_bestiary()
 	_refresh_shop()
 	for card: SummonCard in _hand.get_children():
 		card.set_interaction_locked(_cards_locked())
 	if _cards_locked():
 		_region.hide()
+
+func _choose_elite_gold() -> void:
+	if not _battle.claim_reward(BattleDefinition.RewardType.ELITE):
+		return
+	GameManager.add_gold(150)
+	_elite_reward.mark_selected("+150 Gold claimed")
+
+func _open_elite_upgrade() -> void:
+	if _battle.can_claim_reward(BattleDefinition.RewardType.ELITE) and deck.has_upgradeable_cards():
+		_elite_reward.open_upgrade(_selection_captions(true))
+
+func _choose_elite_upgrade(id: int) -> void:
+	if not _elite_reward.selecting or not deck.can_upgrade(id) or not _battle.claim_reward(BattleDefinition.RewardType.ELITE):
+		return
+	deck.upgrade_card(id)
+	_rebuild_hand()
+	_elite_reward.mark_selected("Upgraded: " + deck.card_caption(id))
 
 func _update_gold(value: int) -> void:
 	$Screen/Gold.text = "Gold: %d" % value
@@ -195,7 +238,7 @@ func _learn_skill(skill_id: StringName) -> void:
 
 
 func _new_run() -> void:
-	if not _battle.victory or _restarting or _bestiary.visible or get_tree().paused:
+	if not _battle.boss_boundary or _restarting or _bestiary.visible or get_tree().paused:
 		return
 	_restarting = true
 	$Screen/NewRun.disabled = true
@@ -212,10 +255,10 @@ func _restart_scene() -> void:
 
 
 func _cards_locked() -> bool:
-	return get_tree().paused or _battle.between_battles or _battle.victory or (is_instance_valid(_bestiary) and _bestiary.visible)
+	return get_tree().paused or not _battle.is_combat_active() or (is_instance_valid(_bestiary) and _bestiary.visible)
 
 func _can_open_bestiary() -> bool:
-	return not _restarting and _battle.current_battle > 0 and not _battle.between_battles and not _battle.shop_open and not _reward.visible and not _shop.visible and not _shop.selecting
+	return not _restarting and _battle.current_battle > 0 and not _battle.between_battles and not _battle.shop_open and not _reward.visible and not _elite_reward.visible and not _shop.visible and not _shop.selecting
 
 func _open_bestiary() -> void:
 	if not _can_open_bestiary() or _bestiary.visible:
