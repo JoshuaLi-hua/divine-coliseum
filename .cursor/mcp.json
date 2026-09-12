@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "godot": {
+      "command": "node",
+      "args": [
+        "/Users/mingzishishenmedongdong/Desktop/godot-mcp/server/build/index.js"
+      ]
+    }
+  }
+}

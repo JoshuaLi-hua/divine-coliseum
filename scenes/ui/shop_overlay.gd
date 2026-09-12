@@ -30,8 +30,8 @@ func _ready() -> void:
 	add_child(shade)
 	var panel := VBoxContainer.new()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	panel.position = Vector2(-440, -280)
-	panel.size = Vector2(880, 560)
+	panel.position = Vector2(-496, -370)
+	panel.size = Vector2(992, 740)
 	panel.add_theme_constant_override("separation", 14)
 	add_child(panel)
 	var title := Label.new()
@@ -45,8 +45,16 @@ func _ready() -> void:
 	panel.add_child(gold_label)
 	shop = VBoxContainer.new()
 	panel.add_child(shop)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 16)
+	shop.add_child(row)
 	for index: int in range(3):
-		var button := _button("", shop)
+		var button := _button("", row)
+		button.custom_minimum_size = Vector2(320, 378)
+		var face := UnitCardFace.new()
+		face.name = "CardFace"
+		button.add_child(face)
+		face.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		button.pressed.connect(func() -> void: purchase_requested.emit(index))
 		offers.append(button)
 	remove_button = _button("Remove a Card — 50 Gold", shop)
@@ -95,12 +103,13 @@ func configure_offers(cards: Array[CardData]) -> void:
 	for index: int in range(cards.size()):
 		var price: int = CardCatalog.shop_price(cards[index])
 		_offer_prices.append(price)
-		offers[index].text = "%s ★\nCost: %d Gold" % [cards[index].display_name, price]
+		offers[index].get_node("CardFace").configure(cards[index], 1, null, -1, price)
 
 func refresh(gold: int, purchased: Array[bool], deck_size: int, can_upgrade: bool = false) -> void:
 	gold_label.text = "Gold: %d" % gold
 	for index: int in range(3):
 		offers[index].disabled = index >= _offer_prices.size() or purchased[index] or gold < _offer_prices[index]
+		offers[index].modulate = Color(0.5, 0.5, 0.5) if offers[index].disabled else Color.WHITE
 	remove_button.disabled = gold < 50 or deck_size <= 3
 	upgrade_button.disabled = gold < 75 or not can_upgrade
 

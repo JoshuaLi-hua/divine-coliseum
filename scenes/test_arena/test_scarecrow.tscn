@@ -1,0 +1,55 @@
+[gd_scene load_steps=3 format=3]
+[ext_resource type="PackedScene" path="res://scenes/units/unit.tscn" id="1"]
+[ext_resource type="Script" path="res://scenes/test_arena/test_scarecrow.gd" id="2"]
+
+[node name="TestScarecrow" instance=ExtResource("1")]
+script = ExtResource("2")
+team = 1
+unit_name = "Test Scarecrow"
+max_health = 9999
+move_speed = 0.0
+attack_damage = 0
+attack_range = 0.0
+
+[node name="Post" type="Polygon2D" parent="Visual" index="0"]
+color = Color(0.23, 0.22, 0.2, 1)
+polygon = PackedVector2Array(-4, 0, 4, 0, 4, -65, -4, -65)
+
+[node name="Crossbar" type="Polygon2D" parent="Visual" index="1"]
+color = Color(0.22, 0.21, 0.19, 1)
+polygon = PackedVector2Array(-33, -47, 33, -47, 33, -40, -33, -40)
+
+[node name="Tunic" type="Polygon2D" parent="Visual" index="2"]
+color = Color(0.47, 0.46, 0.42, 1)
+polygon = PackedVector2Array(-12, -53, 12, -53, 29, -46, 27, -35, 15, -39, 16, -17, 6, -21, -1, -17, -9, -22, -17, -19, -14, -40, -27, -35, -29, -46)
+
+[node name="Patch" type="Polygon2D" parent="Visual" index="3"]
+color = Color(0.28, 0.28, 0.26, 1)
+polygon = PackedVector2Array(-8, -38, 1, -37, 0, -27, -9, -28)
+
+[node name="Straw" type="Polygon2D" parent="Visual" index="4"]
+color = Color(0.66, 0.63, 0.55, 1)
+polygon = PackedVector2Array(-29, -43, -40, -42, -31, -39, -39, -35, -27, -37)
+
+[node name="StrawRight" type="Polygon2D" parent="Visual" index="5"]
+color = Color(0.66, 0.63, 0.55, 1)
+polygon = PackedVector2Array(29, -43, 40, -42, 31, -39, 39, -35, 27, -37)
+
+[node name="Head" type="Polygon2D" parent="Visual" index="6"]
+color = Color(0.72, 0.69, 0.6, 1)
+polygon = PackedVector2Array(-9, -68, 7, -69, 12, -60, 7, -51, -8, -52, -12, -61)
+
+[node name="EyeLeft" type="Polygon2D" parent="Visual" index="7"]
+color = Color(0.12, 0.12, 0.11, 1)
+polygon = PackedVector2Array(-7, -62, -3, -62, -3, -59, -7, -59)
+
+[node name="EyeRight" type="Polygon2D" parent="Visual" index="8"]
+color = Color(0.12, 0.12, 0.11, 1)
+polygon = PackedVector2Array(3, -62, 7, -62, 7, -59, 3, -59)
+
+[node name="Hat" type="Polygon2D" parent="Visual" index="9"]
+color = Color(0.22, 0.21, 0.19, 1)
+polygon = PackedVector2Array(-18, -66, -8, -70, -5, -81, 6, -78, 9, -70, 19, -66)
+
+[node name="HealthBar" parent="." index="2"]
+position = Vector2(-20, -94)

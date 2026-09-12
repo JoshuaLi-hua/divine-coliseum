@@ -3,6 +3,8 @@
 [ext_resource type="PackedScene" path="res://scenes/units/ashen_healer.tscn" id="2"]
 [resource]
 script = ExtResource("1")
+unit_type = "Support"
+description = "Restores nearby allied units."
 display_name = "Ashen Healer"
 divine_power_cost = 3
 unit_scene = ExtResource("2")

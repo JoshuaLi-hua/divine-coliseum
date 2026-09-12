@@ -3,6 +3,8 @@
 [ext_resource type="PackedScene" path="res://scenes/units/arena_militia.tscn" id="2"]
 [resource]
 script = ExtResource("1")
+unit_type = "Melee"
+description = "A cheap and expendable fighter."
 display_name = "Arena Militia"
 divine_power_cost = 1
 unit_scene = ExtResource("2")

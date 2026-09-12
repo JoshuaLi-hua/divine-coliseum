@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CardData" format=3 uid="uid://sxccdotgi1cy"]
+
+[ext_resource type="Script" uid="uid://jjwr3y08qhdp" path="res://scenes/cards/card_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/units/ironbound_knight.tscn" id="2_s0gbe"]
+
+[resource]
+script = ExtResource("1")
+display_name = "New Enemy (Placeholder)"
+description = "Reusable test unit. Drag into the clearing."
+unit_scene = ExtResource("2_s0gbe")

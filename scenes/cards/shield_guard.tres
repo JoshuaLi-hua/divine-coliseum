@@ -3,6 +3,8 @@
 [ext_resource type="PackedScene" path="res://scenes/units/shield_guard.tscn" id="2"]
 [resource]
 script = ExtResource("1")
+unit_type = "Tank"
+description = "A durable defender with frontal block."
 display_name = "Shield Guard"
 divine_power_cost = 3
 unit_scene = ExtResource("2")

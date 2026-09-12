@@ -42,6 +42,8 @@ var is_dead: bool = false
 var _attack_time_left: float = 0.0
 var _hit_tween: Tween
 var _visual_rest_modulate: Color
+var _relic_base_max_health: int = -1
+var _relic_base_move_speed: float = -1.0
 
 @onready var _health_bar: Node2D = $HealthBar
 @onready var _health_fill: ColorRect = $HealthBar/Fill
@@ -53,8 +55,11 @@ func _ready() -> void:
 	facing_direction = Vector2.RIGHT if team == Team.PLAYER else Vector2.LEFT
 	_visual_rest_modulate = _visual.modulate
 	current_health = max_health
+	_relic_base_max_health = max_health
+	_relic_base_move_speed = move_speed
 	_update_health_bar()
 	add_to_group("units")
+	refresh_relic_modifiers()
 	actions = UnitAction.new()
 	actions.name = "Actions"
 	add_child(actions)
@@ -170,6 +175,10 @@ func _physics_process(delta: float) -> void:
 	if is_emerging or actions.is_busy():
 		velocity = Vector2.ZERO
 		return
+	var focus_target := GameManager.get_focus_target_for(self)
+	if _is_valid_opponent(focus_target) and current_target != focus_target:
+		current_target = focus_target
+		_release_slot()
 	if not _is_valid_opponent(current_target):
 		current_target = _find_nearest_opponent()
 	if _slot_target != current_target or attack_mode != AttackMode.MELEE:
@@ -247,8 +256,13 @@ func _find_nearest_opponent() -> Unit:
 	return nearest
 
 
-func _is_valid_opponent(candidate: Unit) -> bool:
-	return is_instance_valid(candidate) and candidate != self and candidate.is_inside_tree() and not candidate.is_queued_for_deletion() and candidate.is_targetable() and candidate.team != team
+func _is_valid_opponent(candidate: Variant) -> bool:
+	# Keep this parameter untyped/Variant so a stale reference to an already-freed
+	# Unit can be rejected safely before GDScript attempts a typed conversion.
+	if not is_instance_valid(candidate) or not (candidate is Unit):
+		return false
+	var unit := candidate as Unit
+	return unit != self and unit.is_inside_tree() and not unit.is_queued_for_deletion() and unit.is_targetable() and unit.team != team
 
 
 # Melee reach is measured from body edges; ranged distance remains unchanged.
@@ -282,10 +296,13 @@ func _resolve_attack() -> void:
 	if attack_mode == AttackMode.PROJECTILE:
 		_fire_projectile(target)
 	else:
-		target.take_damage(attack_damage, target.global_position.direction_to(global_position))
+		target.take_damage(effective_attack_damage(), target.global_position.direction_to(global_position))
 
 func is_targetable() -> bool:
 	return is_inside_tree() and not is_dead and not is_emerging and not is_queued_for_deletion()
+
+func can_attack_enemies() -> bool:
+	return attack_damage > 0
 
 func _finish_emergence() -> void:
 	if is_dead:
@@ -315,6 +332,38 @@ func heal(amount: int) -> int:
 	tween.tween_property(feedback, "modulate:a", 0.0, 0.65)
 	tween.chain().tween_callback(feedback.queue_free)
 	return restored
+
+
+
+func is_bone_minion() -> bool:
+	return action_style == "minion"
+
+
+func effective_attack_damage() -> int:
+	if team != Team.PLAYER:
+		return attack_damage
+	return maxi(0, roundi(float(attack_damage) * GameManager.player_damage_multiplier()))
+
+
+func refresh_relic_modifiers() -> void:
+	if _relic_base_max_health < 0:
+		_relic_base_max_health = max_health
+	if _relic_base_move_speed < 0.0:
+		_relic_base_move_speed = move_speed
+	var old_max := max_health
+	var new_max := _relic_base_max_health
+	var new_speed := _relic_base_move_speed
+	if team == Team.PLAYER:
+		new_max = maxi(1, roundi(float(_relic_base_max_health) * GameManager.player_max_health_multiplier(self)))
+		new_speed = _relic_base_move_speed * GameManager.player_move_speed_multiplier()
+	max_health = new_max
+	move_speed = new_speed
+	if current_health > 0:
+		if new_max > old_max:
+			current_health += new_max - old_max
+		elif new_max < old_max:
+			current_health = mini(current_health, new_max)
+	_update_health_bar()
 
 
 func take_damage(amount: int, direction_to_source: Vector2 = Vector2.ZERO) -> void:
@@ -381,7 +430,7 @@ func _fire_projectile(target: Unit = null) -> void:
 	if projectile_scene == null or not _is_valid_opponent(target):
 		return
 	var projectile: Projectile = projectile_scene.instantiate()
-	projectile.damage = attack_damage
+	projectile.damage = effective_attack_damage()
 	projectile.speed = projectile_speed
 	projectile.source_team = team
 	projectile.target = target

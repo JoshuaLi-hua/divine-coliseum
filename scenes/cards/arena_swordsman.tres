@@ -3,6 +3,8 @@
 [ext_resource type="PackedScene" path="res://scenes/units/arena_swordsman.tscn" id="2"]
 [resource]
 script = ExtResource("1")
+unit_type = "Melee"
+description = "A reliable melee damage dealer."
 display_name = "Arena Swordsman"
 divine_power_cost = 2
 unit_scene = ExtResource("2")

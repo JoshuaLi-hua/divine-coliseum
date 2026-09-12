@@ -4,6 +4,8 @@
 [ext_resource type="Resource" path="res://scenes/monsters/cave_troll.tres" id="3"]
 [resource]
 script = ExtResource("1")
+unit_type = "Tank"
+description = "A slow but devastating heavy tank."
 monster = ExtResource("3")
 display_name = "Cave Troll"
 divine_power_cost = 5

@@ -15,3 +15,7 @@ position_smoothing_enabled = false
 [node name="SummonRegion" type="Node2D" parent="."]
 visible = false
 script = ExtResource("2_region")
+
+; Only combat roots sort; Arena artwork and summon overlay remain fixed.
+[node name="UnitLayer" type="Node2D" parent="."]
+y_sort_enabled = true

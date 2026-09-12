@@ -15,6 +15,7 @@ var between_battles: bool:
 	get: return phase in [Phase.REWARD, Phase.SHOP]
 var shop_open: bool:
 	get: return phase == Phase.SHOP
+@onready var _unit_layer: Node2D = get_parent().get_node("Arena/UnitLayer")
 @onready var _arena: Node2D = get_parent().get_node("Arena")
 
 func _ready() -> void:
@@ -34,13 +35,14 @@ func _start_next_battle() -> void:
 		return
 	current_battle += 1
 	reward_selected = false
+	GameManager.reset_focus_command()
 	var definition: BattleDefinition = current_definition()
 	phase = Phase.COMBAT
 	for index: int in range(definition.enemies.size()):
 		var enemy: Unit = definition.enemies[index].instantiate()
 		enemy.team = Unit.Team.ENEMY
 		enemy.position = _safe_spawn_position(definition.spawn_positions[index], enemy)
-		_arena.add_child(enemy)
+		_unit_layer.add_child(enemy)
 	changed.emit()
 
 func _safe_spawn_position(preferred: Vector2, enemy: Unit) -> Vector2:
@@ -101,6 +103,8 @@ func _check_battle_clear() -> void:
 		if enemy != null and enemy.team == Unit.Team.ENEMY and not enemy.is_dead and not enemy.is_queued_for_deletion() and _arena.is_ancestor_of(enemy):
 			active_enemies.append(enemy)
 	if active_enemies.is_empty():
+		GameManager.clear_focus_target()
+		GameManager.try_award_golden_chalice(current_battle)
 		reward_selected = false
 		if current_battle == route.size():
 			phase = Phase.VICTORY
@@ -132,6 +136,7 @@ func continue_after_reward() -> void:
 		_start_next_battle()
 
 func _open_shop() -> void:
+	GameManager.clear_focus_target()
 	phase = Phase.SHOP
 	shop_visit += 1
 	changed.emit()
@@ -139,5 +144,6 @@ func _open_shop() -> void:
 func leave_shop() -> void:
 	if phase != Phase.SHOP:
 		return
+	GameManager.clear_focus_target()
 	phase = Phase.ADVANCING
 	_start_next_battle()

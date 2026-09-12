@@ -2,6 +2,8 @@ class_name CardData
 extends Resource
 
 @export var display_name: String = "Unit"
+@export var unit_type: String = "Melee"
+@export_multiline var description: String = ""
 @export var divine_power_cost: int = 0
 @export var unit_scene: PackedScene
 @export var monster: MonsterData

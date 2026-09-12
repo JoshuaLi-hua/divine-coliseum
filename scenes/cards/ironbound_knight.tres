@@ -3,6 +3,8 @@
 [ext_resource type="PackedScene" path="res://scenes/units/ironbound_knight.tscn" id="2"]
 [resource]
 script = ExtResource("1")
+unit_type = "Champion"
+description = "A sturdy front-line champion."
 display_name = "Ironbound Knight"
 divine_power_cost = 3
 unit_scene = ExtResource("2")

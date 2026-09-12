@@ -4,6 +4,8 @@
 [ext_resource type="Resource" path="res://scenes/monsters/wasteland_orc.tres" id="3"]
 [resource]
 script = ExtResource("1")
+unit_type = "Melee"
+description = "A brutal melee bruiser."
 monster = ExtResource("3")
 display_name = "Wasteland Orc"
 divine_power_cost = 2

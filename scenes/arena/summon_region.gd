@@ -24,6 +24,7 @@ func try_summon(unit_scene: PackedScene, viewport_position: Vector2, cost: int, 
 		card_data.apply_summon_stats(summoned, upgrade_level)
 		if champion != null:
 			champion.apply_summon_bonuses(summoned, logical_id, card_data)
-	summoned.position = get_parent().to_local(world_position)
-	get_parent().add_child(summoned)
+	var unit_layer: Node2D = get_parent().get_node("UnitLayer")
+	summoned.position = unit_layer.to_local(world_position)
+	unit_layer.add_child(summoned)
 	return summoned

@@ -13,19 +13,18 @@ var dragging: bool = false
 var _home: Vector2
 var _grab_offset: Vector2
 
+var face: UnitCardFace
+var champion: ChampionState
+
 func _ready() -> void:
-	if is_champion:
-		var badge := Label.new()
-		badge.name = "ChampionBadge"
-		badge.text = "CHAMPION"
-		badge.position = Vector2(12, 1)
-		badge.size.x = 216
-		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		badge.add_theme_font_size_override("font_size", 12)
-		badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(badge)
-	$Name.text = data.display_name
-	$Cost.text = "★".repeat(upgrade_level) + "  |  Cost: %d" % data.divine_power_cost
+	face = UnitCardFace.new()
+	add_child(face)
+	face.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	refresh_presentation()
+
+func refresh_presentation() -> void:
+	if is_instance_valid(face):
+		face.configure(data, upgrade_level, champion, card_id)
 
 func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed and not consumed and not interaction_locked:

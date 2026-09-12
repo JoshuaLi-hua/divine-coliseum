@@ -53,7 +53,7 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_top = -130.0
+offset_top = -318.0
 mouse_filter = 2
 
 [node name="Piles" type="Label" parent="CombatUI/Screen" unique_id=1098289908]
@@ -98,14 +98,14 @@ horizontal_alignment = 2
 
 [node name="VictoryShade" type="ColorRect" parent="CombatUI/Screen" unique_id=1179465234]
 visible = false
-layout_mode = 0
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 color = Color(0, 0, 0, 0.8)
 
 [node name="NewRun" type="Button" parent="CombatUI/Screen" unique_id=860837790]
-visible = false
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5
@@ -138,7 +138,6 @@ disabled = true
 text = "BESTIARY"
 
 [node name="BossMessage" type="Label" parent="CombatUI/Screen" unique_id=830876302]
-visible = false
 layout_mode = 0
 anchor_left = 0.5
 anchor_top = 0.5

@@ -12,8 +12,8 @@ func _ready() -> void:
 	add_child(shade)
 	var box := VBoxContainer.new()
 	box.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	box.position = Vector2(-460,-130)
-	box.size = Vector2(920,260)
+	box.position = Vector2(-496,-228)
+	box.size = Vector2(992,456)
 	box.add_theme_constant_override("separation",24)
 	add_child(box)
 	var title := Label.new()
@@ -27,11 +27,16 @@ func _ready() -> void:
 	for index: int in range(3):
 		var button := Button.new()
 		button.text = "+75 Gold" if index == 2 else ""
-		button.custom_minimum_size = Vector2(296,100)
+		button.custom_minimum_size = Vector2(320,340)
 		_style(button)
 		button.pressed.connect(func() -> void: reward_chosen.emit(index))
 		row.add_child(button)
 		choices.append(button)
+		if index < 2:
+			var face := UnitCardFace.new()
+			face.name = "CardFace"
+			button.add_child(face)
+			face.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	continue_button = Button.new()
 	continue_button.text = "Continue"
 	continue_button.custom_minimum_size.y = 52
@@ -54,7 +59,7 @@ func _style(button: Button) -> void:
 func open(cards: Array[CardData]) -> void:
 	assert(cards.size() == 2)
 	for index: int in range(2):
-		choices[index].text = "%s\n★ | Divine Power: %d" % [cards[index].display_name, cards[index].divine_power_cost]
+		choices[index].get_node("CardFace").configure(cards[index])
 	for button: Button in choices:
 		button.add_theme_color_override("font_disabled_color",Color(0.6,0.6,0.6))
 		button.disabled = false
